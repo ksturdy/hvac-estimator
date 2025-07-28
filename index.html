@@ -13,6 +13,198 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+        
+        /* Mobile-first responsive design */
+        @media (max-width: 768px) {
+            .mobile-stack {
+                flex-direction: column !important;
+            }
+            .mobile-full {
+                width: 100% !important;
+            }
+            .mobile-text-sm {
+                font-size: 0.875rem !important;
+            }
+            .mobile-p-4 {
+                padding: 1rem !important;
+            }
+            .mobile-gap-4 {
+                gap: 1rem !important;
+            }
+            .mobile-mb-4 {
+                margin-bottom: 1rem !important;
+            }
+            .mobile-hidden {
+                display: none !important;
+            }
+            /* Compact grid for mobile */
+            .mobile-grid-1 {
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+            }
+            /* Smaller text on mobile */
+            .mobile-text-2xl {
+                font-size: 1.5rem !important;
+                line-height: 2rem !important;
+            }
+            .mobile-text-xl {
+                font-size: 1.25rem !important;
+                line-height: 1.75rem !important;
+            }
+        }
+        
+        /* iPhone specific optimizations */
+        @media (max-width: 480px) {
+            .iphone-text-sm {
+                font-size: 0.75rem !important;
+            }
+            .iphone-p-2 {
+                padding: 0.5rem !important;
+            }
+            .iphone-mb-2 {
+                margin-bottom: 0.5rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+
+        // Icons as SVG components
+        const Upload = () => (
+            <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+        );
+
+        const Calculator = () => (
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+        );
+
+        const FileText = () => (
+            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+        );
+
+        const DollarSign = () => (
+            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+            </svg>
+        );
+
+        const Building = () => (
+            <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+        );
+
+        const Thermometer = () => (
+            <svg className="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+        );
+
+        const Download = () => (
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+        );
+
+        const Trash2 = () => (
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+        );
+
+        const CheckCircle = () => (
+            <svg className="w-12 h-12 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
+
+        const HVACEstimator = () => {
+                    <div className="max-w-7xl mx-auto">
+                        {/* Header */}
+                        <div className="text-center mb-6 md:mb-8">
+                            <div className="flex items-center justify-center mb-4 mobile-stack mobile-gap-4">
+                                <Thermometer />
+                                <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mobile-text-2xl">HVAC Budget Estimator</h1>
+                            </div>
+                            <p className="text-base md:text-lg text-gray-600 mobile-text-sm">Generate<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HVAC Budget Estimator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Mobile-first responsive design */
+        @media (max-width: 768px) {
+            .mobile-stack {
+                flex-direction: column !important;
+            }
+            .mobile-full {
+                width: 100% !important;
+            }
+            .mobile-text-sm {
+                font-size: 0.875rem !important;
+            }
+            .mobile-p-4 {
+                padding: 1rem !important;
+            }
+            .mobile-gap-4 {
+                gap: 1rem !important;
+            }
+            .mobile-mb-4 {
+                margin-bottom: 1rem !important;
+            }
+            .mobile-hidden {
+                display: none !important;
+            }
+            /* Compact grid for mobile */
+            .mobile-grid-1 {
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+            }
+            /* Smaller text on mobile */
+            .mobile-text-2xl {
+                font-size: 1.5rem !important;
+                line-height: 2rem !important;
+            }
+            .mobile-text-xl {
+                font-size: 1.25rem !important;
+                line-height: 1.75rem !important;
+            }
+        }
+        
+        /* iPhone specific optimizations */
+        @media (max-width: 480px) {
+            .iphone-text-sm {
+                font-size: 0.75rem !important;
+            }
+            .iphone-p-2 {
+                padding: 0.5rem !important;
+            }
+            .iphone-mb-2 {
+                margin-bottom: 0.5rem !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -381,51 +573,51 @@
             };
 
             return (
-                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-3 md:p-6">
                     <div className="max-w-7xl mx-auto">
                         {/* Header */}
-                        <div className="text-center mb-8">
-                            <div className="flex items-center justify-center mb-4">
+                        <div className="text-center mb-6 md:mb-8">
+                            <div className="flex items-center justify-center mb-4 mobile-stack mobile-gap-4">
                                 <Thermometer />
-                                <h1 className="text-4xl font-bold text-gray-800">HVAC Budget Estimator</h1>
+                                <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mobile-text-2xl">HVAC Budget Estimator</h1>
                             </div>
-                            <p className="text-lg text-gray-600">Generate accurate HVAC cost estimates with AI drawing analysis</p>
-                            <p className="text-sm text-gray-500 mt-2">Based on 168 historical projects • Automated room detection</p>
+                            <p className="text-base md:text-lg text-gray-600 mobile-text-sm">Generate accurate HVAC cost estimates with AI drawing analysis</p>
+                            <p className="text-xs md:text-sm text-gray-500 mt-2 mobile-text-sm">Based on 168 historical projects • Automated room detection</p>
                         </div>
 
-                        <div className="grid lg:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mobile-grid-1">
                             {/* Input Panel */}
-                            <div className="bg-white rounded-xl shadow-lg p-6">
-                                <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+                            <div className="bg-white rounded-xl shadow-lg p-4 md:p-6 mobile-p-4">
+                                <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4 md:mb-6 flex items-center mobile-text-xl mobile-mb-4">
                                     <FileText />
                                     Project Information
                                 </h2>
 
-                                <div className="space-y-4">
+                                <div className="space-y-3 md:space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2 mobile-text-sm">Project Name</label>
                                         <input
                                             type="text"
                                             value={project.name}
                                             onChange={(e) => setProject(prev => ({ ...prev, name: e.target.value }))}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full p-2 md:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base"
                                             placeholder="Enter project name"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2 mobile-text-sm">Location</label>
                                         <input
                                             type="text"
                                             value={project.location}
                                             onChange={(e) => setProject(prev => ({ ...prev, location: e.target.value }))}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full p-2 md:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base"
                                             placeholder="Enter project location"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2 mobile-text-sm">
                                             Square Footage *
                                             {roomAnalysis && (
                                                 <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Auto-calculated</span>
@@ -435,18 +627,18 @@
                                             type="number"
                                             value={project.squareFootage}
                                             onChange={(e) => setProject(prev => ({ ...prev, squareFootage: e.target.value }))}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full p-2 md:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base"
                                             placeholder="Enter square footage"
                                             disabled={!!roomAnalysis}
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Building Type *</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2 mobile-text-sm">Building Type *</label>
                                         <select
                                             value={project.buildingType}
                                             onChange={(e) => setProject(prev => ({ ...prev, buildingType: e.target.value }))}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full p-2 md:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base"
                                         >
                                             <option value="">Select building type</option>
                                             {buildingTypes.map(type => (
@@ -458,11 +650,11 @@
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Project Type *</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2 mobile-text-sm">Project Type *</label>
                                         <select
                                             value={project.projectType}
                                             onChange={(e) => setProject(prev => ({ ...prev, projectType: e.target.value }))}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full p-2 md:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base"
                                         >
                                             <option value="">Select project type</option>
                                             {projectTypes.map(type => (
@@ -475,50 +667,50 @@
 
                                     {/* File Upload */}
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Upload Architectural Drawing (Optional)</label>
-                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-                                            <h4 className="font-medium text-blue-800 mb-2">🎯 What the Drawing Upload Does:</h4>
-                                            <ul className="text-sm text-blue-700 space-y-1">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2 mobile-text-sm">Upload Architectural Drawing (Optional)</label>
+                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 md:p-3 mb-3">
+                                            <h4 className="font-medium text-blue-800 mb-2 text-sm mobile-text-sm">🎯 What the Drawing Upload Does:</h4>
+                                            <ul className="text-xs md:text-sm text-blue-700 space-y-1 mobile-text-sm">
                                                 <li>• <strong>Automatic Room Detection:</strong> AI analyzes your drawing to identify different room types</li>
                                                 <li>• <strong>Smart Area Calculation:</strong> Calculates total square footage automatically</li>
                                                 <li>• <strong>Room-Specific HVAC Costs:</strong> Applies different cost multipliers based on room function</li>
-                                                <li>• <strong>More Accurate Estimates:</strong> Server rooms, labs, and kitchens have higher HVAC requirements</li>
+                                                <li className="mobile-hidden">• <strong>More Accurate Estimates:</strong> Server rooms, labs, and kitchens have higher HVAC requirements</li>
                                             </ul>
                                         </div>
                                         
-                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 md:p-6 text-center">
                                             {!uploadedFile ? (
                                                 <div onClick={() => fileInputRef.current?.click()} className="cursor-pointer">
                                                     <Upload />
-                                                    <p className="text-gray-600 mb-2">Click to upload drawing</p>
-                                                    <p className="text-sm text-gray-500">PDF, JPG, PNG, DWG files supported</p>
+                                                    <p className="text-gray-600 mb-2 text-sm md:text-base mobile-text-sm">Click to upload drawing</p>
+                                                    <p className="text-xs md:text-sm text-gray-500 mobile-text-sm">PDF, JPG, PNG, DWG files supported</p>
                                                 </div>
                                             ) : (
                                                 <div className="space-y-3">
                                                     <CheckCircle />
                                                     <div>
-                                                        <p className="font-medium text-gray-800">{uploadedFile.name}</p>
-                                                        <p className="text-sm text-gray-500">{(uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                                                        <p className="font-medium text-gray-800 text-sm md:text-base mobile-text-sm">{uploadedFile.name}</p>
+                                                        <p className="text-xs md:text-sm text-gray-500 mobile-text-sm">{(uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                                                     </div>
                                                     {isAnalyzing && (
                                                         <div className="flex items-center justify-center">
                                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                                                            <span className="text-sm text-blue-600">Analyzing rooms and calculating areas...</span>
+                                                            <span className="text-xs md:text-sm text-blue-600 mobile-text-sm">Analyzing rooms and calculating areas...</span>
                                                         </div>
                                                     )}
                                                     {roomAnalysis && !isAnalyzing && (
-                                                        <div className="bg-green-50 p-3 rounded-lg">
-                                                            <div className="text-sm text-green-800 font-medium">
+                                                        <div className="bg-green-50 p-2 md:p-3 rounded-lg">
+                                                            <div className="text-xs md:text-sm text-green-800 font-medium mobile-text-sm">
                                                                 ✅ Advanced Analysis Complete!
                                                             </div>
-                                                            <div className="text-sm text-green-700 mt-1">
+                                                            <div className="text-xs md:text-sm text-green-700 mt-1 mobile-text-sm">
                                                                 <strong>Rooms:</strong> {roomAnalysis.rooms.length} detected • {roomAnalysis.totalArea.toLocaleString()} sq ft total
                                                             </div>
                                                         </div>
                                                     )}
                                                     <button
                                                         onClick={clearFile}
-                                                        className="text-red-600 hover:text-red-800 text-sm flex items-center mx-auto"
+                                                        className="text-red-600 hover:text-red-800 text-xs md:text-sm flex items-center mx-auto mobile-text-sm"
                                                     >
                                                         <Trash2 />
                                                         Remove file and use manual entry
@@ -536,19 +728,19 @@
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2 mobile-text-sm">Additional Notes</label>
                                         <textarea
                                             value={project.notes}
                                             onChange={(e) => setProject(prev => ({ ...prev, notes: e.target.value }))}
                                             rows={3}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full p-2 md:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base"
                                             placeholder="Special requirements, existing conditions, etc."
                                         />
                                     </div>
 
                                     <button
                                         onClick={generateEstimate}
-                                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                                        className="w-full bg-blue-600 text-white py-2 md:py-3 px-4 md:px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center text-sm md:text-base mobile-full"
                                     >
                                         <Calculator />
                                         Generate Estimate
@@ -557,16 +749,16 @@
                             </div>
 
                             {/* Results Panel */}
-                            <div className="bg-white rounded-xl shadow-lg p-6">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-2xl font-semibold text-gray-800 flex items-center">
+                            <div className="bg-white rounded-xl shadow-lg p-4 md:p-6 mobile-p-4">
+                                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 md:mb-6 mobile-stack mobile-gap-4 mobile-mb-4">
+                                    <h2 className="text-xl md:text-2xl font-semibold text-gray-800 flex items-center mobile-text-xl">
                                         <DollarSign />
                                         Cost Estimate
                                     </h2>
                                     {estimate && (
                                         <button
                                             onClick={exportToExcel}
-                                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center text-sm"
+                                            className="bg-green-600 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center text-xs md:text-sm mobile-full mobile-text-sm"
                                         >
                                             <Download />
                                             Export to Excel
@@ -575,16 +767,16 @@
                                 </div>
 
                                 {!estimate ? (
-                                    <div className="text-center py-16">
+                                    <div className="text-center py-12 md:py-16">
                                         <Building />
-                                        <p className="text-gray-500">Complete the form and click "Generate Estimate"</p>
+                                        <p className="text-gray-500 text-sm md:text-base mobile-text-sm">Complete the form and click "Generate Estimate"</p>
                                     </div>
                                 ) : (
-                                    <div className="space-y-6">
+                                    <div className="space-y-4 md:space-y-6">
                                         {/* Project Summary */}
-                                        <div className="bg-blue-50 p-4 rounded-lg">
-                                            <h3 className="font-semibold text-gray-800 mb-2">{estimate.project.name || "Unnamed Project"}</h3>
-                                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                        <div className="bg-blue-50 p-3 md:p-4 rounded-lg mobile-p-4">
+                                            <h3 className="font-semibold text-gray-800 mb-2 text-sm md:text-base mobile-text-sm">{estimate.project.name || "Unnamed Project"}</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs md:text-sm mobile-grid-1 mobile-text-sm">
                                                 <div><span className="text-gray-600">Size:</span> {parseInt(estimate.project.squareFootage).toLocaleString()} sq ft</div>
                                                 <div><span className="text-gray-600">Type:</span> {estimate.project.projectType}</div>
                                                 <div><span className="text-gray-600">Category:</span> {estimate.project.buildingType}</div>
@@ -601,27 +793,27 @@
                                         </div>
 
                                         {/* Main Estimate */}
-                                        <div className="bg-green-50 p-6 rounded-lg text-center">
-                                            <h3 className="text-lg font-semibold text-gray-800 mb-2">Total Estimated Cost</h3>
-                                            <div className="text-3xl font-bold text-green-600 mb-2">{formatCurrency(estimate.totalCost)}</div>
-                                            <div className="text-lg text-gray-600">${estimate.costPerSqft.toFixed(2)} per sq ft</div>
+                                        <div className="bg-green-50 p-4 md:p-6 rounded-lg text-center mobile-p-4">
+                                            <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-2 mobile-text-sm">Total Estimated Cost</h3>
+                                            <div className="text-2xl md:text-3xl font-bold text-green-600 mb-2 mobile-text-xl">{formatCurrency(estimate.totalCost)}</div>
+                                            <div className="text-sm md:text-lg text-gray-600 mobile-text-sm">${estimate.costPerSqft.toFixed(2)} per sq ft</div>
                                         </div>
 
                                         {/* PROJECT COMPARISON - Historical Analysis */}
-                                        <div className="mb-6">
-                                            <h4 className="font-semibold text-gray-800 mb-3">📊 Project vs Historical Data</h4>
+                                        <div className="mb-4 md:mb-6 mobile-mb-4">
+                                            <h4 className="font-semibold text-gray-800 mb-3 text-sm md:text-base mobile-text-sm mobile-mb-4">📊 Project vs Historical Data</h4>
                                             
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 gap-4 mobile-grid-1 mobile-gap-4">
                                                 {/* Project Type Comparison */}
-                                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                                    <h5 className="font-medium text-blue-800 mb-2">Project Type Analysis</h5>
+                                                <div className="bg-blue-50 p-3 md:p-4 rounded-lg border border-blue-200 mobile-p-4">
+                                                    <h5 className="font-medium text-blue-800 mb-2 text-sm mobile-text-sm">Project Type Analysis</h5>
                                                     {(() => {
                                                         const matchingType = projectTypes.find(type => type.name === estimate.project?.projectType);
                                                         if (matchingType) {
                                                             const variance = ((estimate.costPerSqft - matchingType.avgCost) / matchingType.avgCost * 100);
                                                             const isHigher = variance > 0;
                                                             return (
-                                                                <div className="space-y-2 text-sm">
+                                                                <div className="space-y-2 text-xs md:text-sm mobile-text-sm">
                                                                     <div>Type: <strong>{matchingType.name}</strong></div>
                                                                     <div>Historical Avg: <strong>${matchingType.avgCost.toFixed(2)}/sq ft</strong></div>
                                                                     <div>Your Estimate: <strong>${estimate.costPerSqft.toFixed(2)}/sq ft</strong></div>
@@ -632,21 +824,21 @@
                                                                 </div>
                                                             );
                                                         } else {
-                                                            return <div className="text-sm text-red-600">No historical match found</div>;
+                                                            return <div className="text-xs md:text-sm text-red-600 mobile-text-sm">No historical match found</div>;
                                                         }
                                                     })()}
                                                 </div>
 
                                                 {/* Building Type Comparison */}
-                                                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                                                    <h5 className="font-medium text-green-800 mb-2">Building Type Analysis</h5>
+                                                <div className="bg-green-50 p-3 md:p-4 rounded-lg border border-green-200 mobile-p-4">
+                                                    <h5 className="font-medium text-green-800 mb-2 text-sm mobile-text-sm">Building Type Analysis</h5>
                                                     {(() => {
                                                         const matchingType = buildingTypes.find(type => type.name === estimate.project?.buildingType);
                                                         if (matchingType) {
                                                             const variance = ((estimate.costPerSqft - matchingType.avgCost) / matchingType.avgCost * 100);
                                                             const isHigher = variance > 0;
                                                             return (
-                                                                <div className="space-y-2 text-sm">
+                                                                <div className="space-y-2 text-xs md:text-sm mobile-text-sm">
                                                                     <div>Category: <strong>{matchingType.name}</strong></div>
                                                                     <div>Category Avg: <strong>${matchingType.avgCost.toFixed(2)}/sq ft</strong></div>
                                                                     <div>Your Estimate: <strong>${estimate.costPerSqft.toFixed(2)}/sq ft</strong></div>
@@ -657,7 +849,7 @@
                                                                 </div>
                                                             );
                                                         } else {
-                                                            return <div className="text-sm text-red-600">No historical match found</div>;
+                                                            return <div className="text-xs md:text-sm text-red-600 mobile-text-sm">No historical match found</div>;
                                                         }
                                                     })()}
                                                 </div>
@@ -666,44 +858,44 @@
 
                                         {/* Cost Breakdown */}
                                         <div>
-                                            <h4 className="font-semibold text-gray-800 mb-4">Cost Breakdown</h4>
+                                            <h4 className="font-semibold text-gray-800 mb-3 md:mb-4 text-sm md:text-base mobile-text-sm mobile-mb-4">Cost Breakdown</h4>
                                             
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                                                    <span className="font-medium text-gray-800">HVAC Equipment (35%)</span>
-                                                    <span className="font-semibold text-blue-600">{formatCurrency(estimate.breakdown.equipment.total)}</span>
+                                            <div className="space-y-2 md:space-y-3">
+                                                <div className="flex justify-between items-center p-2 md:p-3 bg-blue-50 rounded-lg mobile-p-4">
+                                                    <span className="font-medium text-gray-800 text-xs md:text-sm mobile-text-sm">HVAC Equipment (35%)</span>
+                                                    <span className="font-semibold text-blue-600 text-xs md:text-sm mobile-text-sm">{formatCurrency(estimate.breakdown.equipment.total)}</span>
                                                 </div>
                                                 
-                                                <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                                                    <span className="font-medium text-gray-800">Sheet Metal & Ductwork (25%)</span>
-                                                    <span className="font-semibold text-green-600">{formatCurrency(estimate.breakdown.sheetMetal.total)}</span>
+                                                <div className="flex justify-between items-center p-2 md:p-3 bg-green-50 rounded-lg mobile-p-4">
+                                                    <span className="font-medium text-gray-800 text-xs md:text-sm mobile-text-sm">Sheet Metal & Ductwork (25%)</span>
+                                                    <span className="font-semibold text-green-600 text-xs md:text-sm mobile-text-sm">{formatCurrency(estimate.breakdown.sheetMetal.total)}</span>
                                                 </div>
                                                 
-                                                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                                                    <span className="font-medium text-gray-800">Piping & Hydronic (15%)</span>
-                                                    <span className="font-semibold text-purple-600">{formatCurrency(estimate.breakdown.piping.total)}</span>
+                                                <div className="flex justify-between items-center p-2 md:p-3 bg-purple-50 rounded-lg mobile-p-4">
+                                                    <span className="font-medium text-gray-800 text-xs md:text-sm mobile-text-sm">Piping & Hydronic (15%)</span>
+                                                    <span className="font-semibold text-purple-600 text-xs md:text-sm mobile-text-sm">{formatCurrency(estimate.breakdown.piping.total)}</span>
                                                 </div>
                                                 
-                                                <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
-                                                    <span className="font-medium text-gray-800">Controls & Electrical (10%)</span>
-                                                    <span className="font-semibold text-yellow-600">{formatCurrency(estimate.breakdown.controls.total)}</span>
+                                                <div className="flex justify-between items-center p-2 md:p-3 bg-yellow-50 rounded-lg mobile-p-4">
+                                                    <span className="font-medium text-gray-800 text-xs md:text-sm mobile-text-sm">Controls & Electrical (10%)</span>
+                                                    <span className="font-semibold text-yellow-600 text-xs md:text-sm mobile-text-sm">{formatCurrency(estimate.breakdown.controls.total)}</span>
                                                 </div>
                                                 
-                                                <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-                                                    <span className="font-medium text-gray-800">Installation Labor (20%)</span>
-                                                    <span className="font-semibold text-orange-600">{formatCurrency(estimate.breakdown.labor.total)}</span>
+                                                <div className="flex justify-between items-center p-2 md:p-3 bg-orange-50 rounded-lg mobile-p-4">
+                                                    <span className="font-medium text-gray-800 text-xs md:text-sm mobile-text-sm">Installation Labor (20%)</span>
+                                                    <span className="font-semibold text-orange-600 text-xs md:text-sm mobile-text-sm">{formatCurrency(estimate.breakdown.labor.total)}</span>
                                                 </div>
                                                 
-                                                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                                    <span className="font-medium text-gray-800">Overhead & Markup (15%)</span>
-                                                    <span className="font-semibold text-gray-600">{formatCurrency(estimate.breakdown.overhead.total)}</span>
+                                                <div className="flex justify-between items-center p-2 md:p-3 bg-gray-50 rounded-lg mobile-p-4">
+                                                    <span className="font-medium text-gray-800 text-xs md:text-sm mobile-text-sm">Overhead & Markup (15%)</span>
+                                                    <span className="font-semibold text-gray-600 text-xs md:text-sm mobile-text-sm">{formatCurrency(estimate.breakdown.overhead.total)}</span>
                                                 </div>
                                             </div>
 
-                                            <div className="border-t-2 border-gray-200 pt-4 mt-4">
-                                                <div className="flex justify-between items-center p-4 bg-indigo-50 rounded-lg">
-                                                    <span className="text-lg font-semibold text-gray-800">TOTAL PROJECT COST</span>
-                                                    <span className="text-2xl font-bold text-indigo-600">{formatCurrency(estimate.totalCost)}</span>
+                                            <div className="border-t-2 border-gray-200 pt-3 md:pt-4 mt-3 md:mt-4">
+                                                <div className="flex justify-between items-center p-3 md:p-4 bg-indigo-50 rounded-lg mobile-p-4">
+                                                    <span className="text-sm md:text-lg font-semibold text-gray-800 mobile-text-sm">TOTAL PROJECT COST</span>
+                                                    <span className="text-lg md:text-2xl font-bold text-indigo-600 mobile-text-xl">{formatCurrency(estimate.totalCost)}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -711,15 +903,15 @@
                                         {/* Room Analysis Results */}
                                         {estimate.roomCosts && (
                                             <div>
-                                                <h4 className="font-semibold text-gray-800 mb-3">Room-Specific Analysis</h4>
-                                                <div className="space-y-3">
+                                                <h4 className="font-semibold text-gray-800 mb-3 text-sm md:text-base mobile-text-sm mobile-mb-4">Room-Specific Analysis</h4>
+                                                <div className="space-y-2 md:space-y-3">
                                                     {Object.entries(estimate.roomCosts).map(([roomType, data]) => (
-                                                        <div key={roomType} className="bg-gray-50 p-3 rounded-lg">
+                                                        <div key={roomType} className="bg-gray-50 p-2 md:p-3 rounded-lg mobile-p-4">
                                                             <div className="flex justify-between items-center mb-1">
-                                                                <span className="font-medium">{roomType}</span>
-                                                                <span className="font-semibold text-blue-600">{formatCurrency(data.totalCost)}</span>
+                                                                <span className="font-medium text-xs md:text-sm mobile-text-sm">{roomType}</span>
+                                                                <span className="font-semibold text-blue-600 text-xs md:text-sm mobile-text-sm">{formatCurrency(data.totalCost)}</span>
                                                             </div>
-                                                            <div className="text-sm text-gray-600">
+                                                            <div className="text-xs md:text-sm text-gray-600 mobile-text-sm">
                                                                 {data.area} sq ft × ${data.costPerSqft.toFixed(2)}/sq ft
                                                             </div>
                                                         </div>
@@ -733,12 +925,12 @@
                         </div>
 
                         {/* Historical Reference */}
-                        <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
-                            <h3 className="text-xl font-semibold text-gray-800 mb-4">Historical Data Reference</h3>
-                            <div className="grid md:grid-cols-2 gap-6">
+                        <div className="mt-6 md:mt-8 bg-white rounded-xl shadow-lg p-4 md:p-6 mobile-p-4">
+                            <h3 className="text-lg md:text-xl font-semibold text-gray-800 mb-3 md:mb-4 mobile-text-xl mobile-mb-4">Historical Data Reference</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mobile-grid-1 mobile-gap-4">
                                 <div>
-                                    <h4 className="font-medium text-gray-700 mb-3">Project Types (Top 10)</h4>
-                                    <div className="space-y-2 text-sm">
+                                    <h4 className="font-medium text-gray-700 mb-3 text-sm md:text-base mobile-text-sm">Project Types (Top 10)</h4>
+                                    <div className="space-y-1 md:space-y-2 text-xs md:text-sm mobile-text-sm">
                                         {projectTypes.slice(0, 10).map(type => (
                                             <div key={type.name} className="flex justify-between">
                                                 <span className="text-gray-600">{type.name}</span>
@@ -748,8 +940,8 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 className="font-medium text-gray-700 mb-3">Building Types</h4>
-                                    <div className="space-y-2 text-sm">
+                                    <h4 className="font-medium text-gray-700 mb-3 text-sm md:text-base mobile-text-sm">Building Types</h4>
+                                    <div className="space-y-1 md:space-y-2 text-xs md:text-sm mobile-text-sm">
                                         {buildingTypes.map(type => (
                                             <div key={type.name} className="flex justify-between">
                                                 <span className="text-gray-600">{type.name}</span>
