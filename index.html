@@ -745,6 +745,325 @@
             { name: 'Buildout', avgCost: 47.63, projects: 2 }
         ];
 
+        // Enhanced labor calculation with detailed trades and scheduling
+        function calculateDetailedLabor(sqft, totalCost) {
+            const laborTrades = {
+                'Demolition': {
+                    hoursPerKSF: 8,
+                    rate: 45,
+                    sequence: 1,
+                    duration: 3,
+                    crew: 2,
+                    description: 'Remove existing HVAC equipment and ductwork'
+                },
+                'Site Preparation': {
+                    hoursPerKSF: 4,
+                    rate: 50,
+                    sequence: 2,
+                    duration: 2,
+                    crew: 3,
+                    description: 'Site setup, material staging, safety prep'
+                },
+                'Equipment Installation': {
+                    hoursPerKSF: 15,
+                    rate: 85,
+                    sequence: 3,
+                    duration: 8,
+                    crew: 4,
+                    description: 'Install RTUs, AHUs, boilers, chillers'
+                },
+                'Rough Piping': {
+                    hoursPerKSF: 25,
+                    rate: 75,
+                    sequence: 4,
+                    duration: 12,
+                    crew: 6,
+                    description: 'Install main piping runs, risers, distribution'
+                },
+                'Rough Ductwork': {
+                    hoursPerKSF: 35,
+                    rate: 65,
+                    sequence: 5,
+                    duration: 15,
+                    crew: 8,
+                    description: 'Install main ductwork, trunk lines'
+                },
+                'Branch Piping': {
+                    hoursPerKSF: 18,
+                    rate: 75,
+                    sequence: 6,
+                    duration: 10,
+                    crew: 4,
+                    description: 'Install branch piping, connections'
+                },
+                'Branch Ductwork': {
+                    hoursPerKSF: 28,
+                    rate: 65,
+                    sequence: 7,
+                    duration: 12,
+                    crew: 6,
+                    description: 'Install branch ductwork, flex connections'
+                },
+                'Electrical Rough-In': {
+                    hoursPerKSF: 12,
+                    rate: 80,
+                    sequence: 8,
+                    duration: 8,
+                    crew: 3,
+                    description: 'Install electrical feeds, panels, conduit'
+                },
+                'Controls Installation': {
+                    hoursPerKSF: 20,
+                    rate: 90,
+                    sequence: 9,
+                    duration: 10,
+                    crew: 3,
+                    description: 'Install BMS, sensors, actuators'
+                },
+                'Insulation': {
+                    hoursPerKSF: 15,
+                    rate: 55,
+                    sequence: 10,
+                    duration: 6,
+                    crew: 4,
+                    description: 'Insulate piping and ductwork'
+                },
+                'Air Devices': {
+                    hoursPerKSF: 10,
+                    rate: 60,
+                    sequence: 11,
+                    duration: 5,
+                    crew: 3,
+                    description: 'Install diffusers, grilles, registers'
+                },
+                'Controls Programming': {
+                    hoursPerKSF: 8,
+                    rate: 110,
+                    sequence: 12,
+                    duration: 6,
+                    crew: 2,
+                    description: 'Program BMS, commission controls'
+                },
+                'Testing & Balancing': {
+                    hoursPerKSF: 12,
+                    rate: 95,
+                    sequence: 13,
+                    duration: 8,
+                    crew: 2,
+                    description: 'Test all systems, balance airflow'
+                },
+                'Final Commissioning': {
+                    hoursPerKSF: 6,
+                    rate: 105,
+                    sequence: 14,
+                    duration: 4,
+                    crew: 3,
+                    description: 'Final testing, documentation, training'
+                },
+                'Cleanup & Closeout': {
+                    hoursPerKSF: 3,
+                    rate: 45,
+                    sequence: 15,
+                    duration: 2,
+                    crew: 3,
+                    description: 'Final cleanup, documentation turnover'
+                }
+            };
+
+            const kSqft = sqft / 1000;
+            const laborDetails = {};
+
+            Object.entries(laborTrades).forEach(([trade, data]) => {
+                const totalHours = data.hoursPerKSF * kSqft;
+                const laborCost = totalHours * data.rate;
+                
+                laborDetails[trade] = {
+                    ...data,
+                    totalHours: Math.round(totalHours),
+                    laborCost: Math.round(laborCost),
+                    dailyHours: Math.round(totalHours / data.duration),
+                    totalCrew: data.crew
+                };
+            });
+
+            return laborDetails;
+        }
+
+        // Generate labor curve data based on project schedule with new bell curve algorithm
+        function generateLaborCurve(laborDetails, startDate, endDate, workingDays, hoursPerDay) {
+            if (!startDate || !endDate) return null;
+
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            // Calculate total working days in project
+            let totalWorkDays = 0;
+            let currentDate = new Date(start);
+            while (currentDate <= end) {
+                if (workingDays == 7 || (workingDays == 6 && currentDate.getDay() !== 0) || (workingDays == 5 && currentDate.getDay() !== 0 && currentDate.getDay() !== 6)) {
+                    totalWorkDays++;
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            // Define trade categories and their schedules
+            const tradeCategories = {
+                'Early Trades': {
+                    trades: ['Demolition', 'Site Preparation'],
+                    startPercent: 0,
+                    endPercent: 15,
+                    pattern: 'front-loaded'
+                },
+                'Equipment': {
+                    trades: ['Equipment Installation'],
+                    startPercent: 10,
+                    endPercent: 30,
+                    pattern: 'bell'
+                },
+                'Piping': {
+                    trades: ['Rough Piping', 'Branch Piping', 'Insulation'],
+                    startPercent: 0,
+                    endPercent: 100,
+                    pattern: 'bell'
+                },
+                'Sheet Metal': {
+                    trades: ['Rough Ductwork', 'Branch Ductwork', 'Air Devices'],
+                    startPercent: 0,
+                    endPercent: 100,
+                    pattern: 'bell'
+                },
+                'Electrical': {
+                    trades: ['Electrical Rough-In'],
+                    startPercent: 20,
+                    endPercent: 60,
+                    pattern: 'bell'
+                },
+                'Controls': {
+                    trades: ['Controls Installation', 'Controls Programming'],
+                    startPercent: 50,
+                    endPercent: 100,
+                    pattern: 'bell'
+                },
+                'Commissioning': {
+                    trades: ['Testing & Balancing', 'Final Commissioning'],
+                    startPercent: 50,
+                    endPercent: 100,
+                    pattern: 'bell'
+                },
+                'Closeout': {
+                    trades: ['Cleanup & Closeout'],
+                    startPercent: 85,
+                    endPercent: 100,
+                    pattern: 'back-loaded'
+                }
+            };
+
+            // Create labor curve array
+            const laborCurve = [];
+            const tradeSchedule = [];
+            currentDate = new Date(start);
+            let workDay = 0;
+
+            // Build trade schedule with realistic timing
+            Object.entries(tradeCategories).forEach(([categoryName, category]) => {
+                const startDay = Math.floor(totalWorkDays * category.startPercent / 100);
+                const endDay = Math.floor(totalWorkDays * category.endPercent / 100);
+                const categoryDuration = endDay - startDay + 1;
+
+                category.trades.forEach(tradeName => {
+                    const trade = laborDetails[tradeName];
+                    if (trade) {
+                        tradeSchedule.push({
+                            trade: tradeName,
+                            category: categoryName,
+                            startDay: startDay,
+                            endDay: endDay,
+                            duration: categoryDuration,
+                            totalHours: trade.totalHours,
+                            crew: trade.totalCrew,
+                            rate: trade.rate,
+                            description: trade.description,
+                            pattern: category.pattern
+                        });
+                    }
+                });
+            });
+
+            // Generate daily labor data
+            while (currentDate <= end) {
+                if (workingDays == 7 || (workingDays == 6 && currentDate.getDay() !== 0) || (workingDays == 5 && currentDate.getDay() !== 0 && currentDate.getDay() !== 6)) {
+                    const dailyData = {
+                        date: new Date(currentDate).toLocaleDateString(),
+                        workDay: workDay + 1,
+                        totalWorkers: 0,
+                        totalHours: 0,
+                        totalCost: 0,
+                        trades: []
+                    };
+
+                    // Calculate work for each active trade
+                    tradeSchedule.forEach(tradeInfo => {
+                        if (workDay >= tradeInfo.startDay && workDay <= tradeInfo.endDay) {
+                            const progress = (workDay - tradeInfo.startDay) / (tradeInfo.endDay - tradeInfo.startDay);
+                            let intensity = 1.0;
+
+                            // Apply different curve patterns
+                            switch (tradeInfo.pattern) {
+                                case 'bell':
+                                    intensity = Math.sin(progress * Math.PI);
+                                    break;
+                                case 'front-loaded':
+                                    intensity = Math.exp(-progress * 3) * 0.9 + 0.1;
+                                    break;
+                                case 'back-loaded':
+                                    intensity = 1 - Math.exp(-(progress * 3)) * 0.9;
+                                    break;
+                                default:
+                                    intensity = 1.0;
+                            }
+
+                            // Calculate daily allocation
+                            const dailyHoursBase = tradeInfo.totalHours / tradeInfo.duration;
+                            const dailyHours = Math.round(dailyHoursBase * intensity);
+                            const dailyWorkers = Math.max(1, Math.round(tradeInfo.crew * intensity));
+                            const dailyCost = dailyHours * tradeInfo.rate;
+
+                            if (dailyHours > 0) {
+                                dailyData.trades.push({
+                                    name: tradeInfo.trade,
+                                    workers: dailyWorkers,
+                                    hours: dailyHours,
+                                    cost: dailyCost,
+                                    progress: Math.round(progress * 100),
+                                    intensity: intensity
+                                });
+
+                                dailyData.totalWorkers += dailyWorkers;
+                                dailyData.totalHours += dailyHours;
+                                dailyData.totalCost += dailyCost;
+                            }
+                        }
+                    });
+
+                    laborCurve.push(dailyData);
+                    workDay++;
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            return {
+                laborCurve,
+                tradeSchedule,
+                summary: {
+                    totalWorkDays: workDay,
+                    peakWorkers: Math.max(...laborCurve.map(d => d.totalWorkers)),
+                    averageWorkers: Math.round(laborCurve.reduce((sum, d) => sum + d.totalWorkers, 0) / laborCurve.length),
+                    totalLaborHours: laborCurve.reduce((sum, d) => sum + d.totalHours, 0),
+                    totalLaborCost: laborCurve.reduce((sum, d) => sum + d.totalCost, 0)
+                }
+            };
+        }
+
         // File upload handling
         document.getElementById('uploadArea').addEventListener('click', () => {
             if (!uploadedFile) {
@@ -924,6 +1243,9 @@
 
             const totalCost = sqft * adjustedCostPerSqft;
 
+            // Generate detailed labor analysis
+            const detailedLabor = calculateDetailedLabor(sqft, totalCost);
+
             const breakdown = {
                 equipment: { total: totalCost * 0.35 },
                 sheetMetal: { total: totalCost * 0.25 },
@@ -967,9 +1289,21 @@
                 costPerSqft: adjustedCostPerSqft,
                 breakdown,
                 roomCosts,
+                detailedLabor,
                 confidence: selectedProjectType?.projects > 5 ? 'High' : selectedProjectType?.projects > 1 ? 'Medium' : 'Low',
                 generatedDate: new Date().toLocaleDateString()
             };
+
+            // Generate labor curve if schedule dates are provided
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const workingDays = parseInt(document.getElementById('workingDays').value);
+            const hoursPerDay = parseInt(document.getElementById('hoursPerDay').value);
+
+            if (startDate && endDate) {
+                const laborSchedule = generateLaborCurve(detailedLabor, startDate, endDate, workingDays, hoursPerDay);
+                currentEstimate.laborSchedule = laborSchedule;
+            }
 
             displayResults(currentEstimate);
         }
@@ -1054,6 +1388,8 @@
                 </div>
 
                 ${estimate.roomCosts ? generateRoomAnalysis(estimate.roomCosts) : ''}
+
+                ${estimate.detailedLabor ? generateLaborAnalysis(estimate) : ''}
             `;
         }
 
@@ -1127,6 +1463,239 @@
                     ${roomItems}
                 </div>
             `;
+        }
+
+        function generateLaborAnalysis(estimate) {
+            if (!estimate.detailedLabor) return '';
+
+            const laborItems = Object.entries(estimate.detailedLabor)
+                .sort((a, b) => a[1].sequence - b[1].sequence)
+                .map(([trade, data]) => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: white; border-radius: 0.375rem; border: 1px solid #e5e7eb; margin-bottom: 0.5rem;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; font-size: 0.875rem;">${trade}</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">${data.description}</div>
+                        </div>
+                        <div style="text-align: right; font-size: 0.75rem;">
+                            <div style="font-weight: 600;">${formatCurrency(data.laborCost)}</div>
+                            <div style="color: #6b7280;">${data.totalHours}h • ${data.crew} workers</div>
+                        </div>
+                    </div>
+                `).join('');
+
+            const totalLaborCost = Object.values(estimate.detailedLabor).reduce((sum, trade) => sum + trade.laborCost, 0);
+
+            let laborCurveHtml = '';
+            if (estimate.laborSchedule) {
+                laborCurveHtml = `
+                    <div style="margin-top: 1rem;">
+                        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 0.75rem;">
+                            <h5 style="font-weight: 500; color: #4f46e5; margin: 0;">📈 Labor Curve Analysis</h5>
+                            <button class="btn" style="background-color: #6366f1; color: white; padding: 0.25rem 0.75rem; font-size: 0.875rem;" onclick="toggleLaborCurve()">
+                                <span id="laborCurveToggle">Show</span> Labor Curve
+                            </button>
+                        </div>
+                        
+                        <div id="laborCurveContent" class="hidden">
+                            ${generateLaborCurveDisplay(estimate.laborSchedule)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div style="margin-top: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <h4 style="font-weight: 600; color: #1f2937; margin: 0;">⚡ Detailed Labor Analysis</h4>
+                    </div>
+
+                    <div style="background-color: #f3e8ff; padding: 1rem; border-radius: 0.5rem; border: 1px solid #c4b5fd;">
+                        <h5 style="font-weight: 500; color: #7c3aed; margin-bottom: 0.75rem;">Labor Breakdown by Trade</h5>
+                        <div style="max-height: 12rem; overflow-y: auto;">
+                            ${laborItems}
+                        </div>
+                        <div style="border-top: 1px solid #c4b5fd; padding-top: 0.5rem; margin-top: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; font-weight: 600;">
+                                <span>Total Labor Cost:</span>
+                                <span style="color: #7c3aed;">${formatCurrency(totalLaborCost)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${laborCurveHtml}
+                </div>
+            `;
+        }
+
+        function generateLaborCurveDisplay(laborSchedule) {
+            return `
+                <div style="background-color: #eef2ff; padding: 1rem; border-radius: 0.5rem; border: 1px solid #c7d2fe;">
+                    <!-- Summary Stats -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                        <div style="background: white; padding: 0.75rem; border-radius: 0.375rem; text-align: center;">
+                            <div style="font-size: 1.125rem; font-weight: bold; color: #4f46e5;">${laborSchedule.summary.totalWorkDays}</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Work Days</div>
+                        </div>
+                        <div style="background: white; padding: 0.75rem; border-radius: 0.375rem; text-align: center;">
+                            <div style="font-size: 1.125rem; font-weight: bold; color: #4f46e5;">${laborSchedule.summary.peakWorkers}</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Peak Workers</div>
+                        </div>
+                        <div style="background: white; padding: 0.75rem; border-radius: 0.375rem; text-align: center;">
+                            <div style="font-size: 1.125rem; font-weight: bold; color: #4f46e5;">${laborSchedule.summary.averageWorkers}</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Avg Workers</div>
+                        </div>
+                    </div>
+
+                    <!-- Labor Curve Chart -->
+                    <div style="background: white; padding: 1rem; border-radius: 0.375rem;">
+                        <h6 style="font-weight: 500; margin-bottom: 0.75rem;">📈 Labor Curve - Workers Over Time</h6>
+                        
+                        <!-- Chart Area -->
+                        <div style="position: relative; background-color: #f9fafb; padding: 1rem; border-radius: 0.375rem; height: 300px;">
+                            ${generateSVGChart(laborSchedule)}
+                        </div>
+
+                        <!-- Legend -->
+                        <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.75rem;">
+                            <div style="display: flex; align-items: center;">
+                                <div style="width: 1rem; height: 2px; background-color: #4f46e5; margin-right: 0.5rem;"></div>
+                                <span>Total Workers</span>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <div style="width: 1rem; height: 2px; background: repeating-linear-gradient(to right, #10b981 0, #10b981 5px, transparent 5px, transparent 10px); margin-right: 0.5rem;"></div>
+                                <span>Sheet Metal</span>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <div style="width: 1rem; height: 2px; background: repeating-linear-gradient(to right, #f59e0b 0, #f59e0b 3px, transparent 3px, transparent 6px); margin-right: 0.5rem;"></div>
+                                <span>Piping</span>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <div style="width: 1rem; height: 2px; background: repeating-linear-gradient(to right, #ef4444 0, #ef4444 8px, transparent 8px, transparent 10px); margin-right: 0.5rem;"></div>
+                                <span>Equipment</span>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <div style="width: 1rem; height: 2px; background: repeating-linear-gradient(to right, #8b5cf6 0, #8b5cf6 2px, transparent 2px, transparent 4px); margin-right: 0.5rem;"></div>
+                                <span>Controls</span>
+                            </div>
+                        </div>
+
+                        <!-- Peak Analysis -->
+                        <div style="margin-top: 1rem; background-color: #dbeafe; padding: 0.75rem; border-radius: 0.375rem; border: 1px solid #93c5fd;">
+                            <h6 style="font-weight: 500; color: #1e40af; margin-bottom: 0.5rem;">📊 Peak Workforce Analysis</h6>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.75rem;">
+                                <div>
+                                    <div style="font-weight: 500;">Peak Sheet Metal: ${getMaxTradeWorkers(laborSchedule, ['Ductwork', 'Air Devices'])} workers</div>
+                                    <div style="color: #6b7280;">During ductwork installation phase</div>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 500;">Peak Piping: ${getMaxTradeWorkers(laborSchedule, ['Piping', 'Insulation'])} workers</div>
+                                    <div style="color: #6b7280;">During piping installation phase</div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid #93c5fd;">
+                                <div style="font-size: 0.75rem; color: #1d4ed8;">
+                                    <strong>Timeline:</strong> ${laborSchedule.summary.totalWorkDays} work days 
+                                    (${laborSchedule.laborCurve[0]?.date} to ${laborSchedule.laborCurve[laborSchedule.laborCurve.length - 1]?.date})
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trade Schedule -->
+                    <div style="background: white; padding: 0.75rem; border-radius: 0.375rem; margin-top: 0.75rem;">
+                        <h6 style="font-weight: 500; margin-bottom: 0.5rem;">Trade Schedule</h6>
+                        <div style="max-height: 8rem; overflow-y: auto;">
+                            ${laborSchedule.tradeSchedule.map((trade, index) => `
+                                <div key="${index}" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; padding: 0.5rem; background-color: #f9fafb; border-radius: 0.375rem; margin-bottom: 0.5rem;">
+                                    <div>
+                                        <div style="font-weight: 500;">${trade.trade}</div>
+                                        <div style="color: #6b7280;">Days ${trade.startDay + 1}-${trade.endDay + 1}</div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-weight: 500;">${trade.crew} workers</div>
+                                        <div style="color: #6b7280;">${trade.totalHours}h total</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateSVGChart(laborSchedule) {
+            const curve = laborSchedule.laborCurve;
+            const maxWorkers = laborSchedule.summary.peakWorkers;
+            
+            // Generate points for total workers line
+            const totalPoints = curve.map((day, index) => {
+                const x = curve.length > 1 ? (index / (curve.length - 1)) * 400 : 200;
+                const y = maxWorkers > 0 ? 260 - (day.totalWorkers / maxWorkers) * 260 : 260;
+                return `${x},${y}`;
+            }).join(' ');
+
+            return `
+                <!-- Y-axis labels -->
+                <div style="position: absolute; left: 0; top: 0; height: 260px; display: flex; flex-direction: column; justify-content: space-between; font-size: 0.75rem; color: #6b7280; padding-right: 0.5rem;">
+                    <span>${maxWorkers}</span>
+                    <span>${Math.round(maxWorkers * 0.75)}</span>
+                    <span>${Math.round(maxWorkers * 0.5)}</span>
+                    <span>${Math.round(maxWorkers * 0.25)}</span>
+                    <span>0</span>
+                </div>
+                
+                <!-- Chart content -->
+                <div style="margin-left: 2rem; height: 260px; position: relative;">
+                    <!-- SVG Chart -->
+                    <svg style="position: absolute; inset: 0; width: 100%; height: 100%;" viewBox="0 0 400 260" preserveAspectRatio="none">
+                        <!-- Grid lines -->
+                        ${[0, 0.25, 0.5, 0.75, 1].map(ratio => `
+                            <line x1="0" y1="${260 - (ratio * 260)}" x2="400" y2="${260 - (ratio * 260)}" stroke="#e5e7eb" stroke-width="1" vector-effect="non-scaling-stroke" />
+                        `).join('')}
+                        ${[0, 0.25, 0.5, 0.75, 1].map(ratio => `
+                            <line x1="${ratio * 400}" y1="0" x2="${ratio * 400}" y2="260" stroke="#e5e7eb" stroke-width="1" vector-effect="non-scaling-stroke" />
+                        `).join('')}
+
+                        <!-- Total Workers Line -->
+                        <polyline fill="none" stroke="#4f46e5" stroke-width="3" vector-effect="non-scaling-stroke" points="${totalPoints}" />
+                    </svg>
+                </div>
+                
+                <!-- X-axis labels -->
+                <div style="position: absolute; bottom: 0; left: 2rem; right: 0; display: flex; justify-content: space-between; font-size: 0.75rem; color: #6b7280; padding-top: 0.5rem;">
+                    ${curve.length > 0 ? `
+                        <span>${curve[0]?.date}</span>
+                        ${curve.length > 4 ? `
+                            <span>${curve[Math.floor(curve.length / 4)]?.date}</span>
+                            <span>${curve[Math.floor(curve.length / 2)]?.date}</span>
+                            <span>${curve[Math.floor(curve.length * 3 / 4)]?.date}</span>
+                        ` : ''}
+                        <span>${curve[curve.length - 1]?.date}</span>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function getMaxTradeWorkers(laborSchedule, tradeKeywords) {
+            return Math.max(...laborSchedule.laborCurve.map(day => 
+                day.trades.filter(trade => tradeKeywords.some(keyword => trade.name.includes(keyword)))
+                    .reduce((sum, trade) => sum + trade.workers, 0)
+            ), 0);
+        }
+
+        function toggleLaborCurve() {
+            const content = document.getElementById('laborCurveContent');
+            const toggle = document.getElementById('laborCurveToggle');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                toggle.textContent = 'Hide';
+            } else {
+                content.classList.add('hidden');
+                toggle.textContent = 'Show';
+            }
+        }
         }
 
         function formatCurrency(amount) {
