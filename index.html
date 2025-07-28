@@ -1,1197 +1,1144 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HVAC Budget Estimator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.js"></script>
     <style>
-        .animate-spin {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #1e40af;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input:disabled {
+            background-color: #f9fafb;
+            color: #6b7280;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-secondary {
+            background-color: #10b981;
+            color: white;
+            font-size: 0.875rem;
+        }
+
+        .btn-secondary:hover {
+            background-color: #059669;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            font-size: 0.875rem;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .schedule-section {
+            background-color: #fefce8;
+            border: 1px solid #fde047;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .schedule-header {
+            font-weight: 500;
+            color: #a16207;
+            margin-bottom: 0.75rem;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .upload-info {
+            background-color: #dbeafe;
+            border: 1px solid #93c5fd;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .upload-info h4 {
+            font-weight: 500;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-info ul {
+            font-size: 0.875rem;
+            color: #1d4ed8;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .upload-info li {
+            margin-bottom: 0.25rem;
+        }
+
+        .results-empty {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: #6b7280;
+        }
+
+        .project-summary {
+            background-color: #dbeafe;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .project-summary h3 {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .main-estimate {
+            background-color: #dcfce7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .main-estimate h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .main-estimate .amount {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #16a34a;
+            margin-bottom: 0.5rem;
+        }
+
+        .main-estimate .per-sqft {
+            font-size: 1.125rem;
+            color: #6b7280;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .breakdown-total {
+            border-top: 2px solid #e5e7eb;
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .breakdown-total .breakdown-item {
+            background-color: #eef2ff;
+            padding: 1rem;
+        }
+
+        .breakdown-total .amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4f46e5;
+        }
+
+        .confidence-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 0.25rem;
+        }
+
+        .confidence-high {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .confidence-medium {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .confidence-low {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .historical-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .historical-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .historical-card {
+            border: 1px solid;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .historical-blue {
+            background-color: #dbeafe;
+            border-color: #93c5fd;
+        }
+
+        .historical-green {
+            background-color: #dcfce7;
+            border-color: #86efac;
+        }
+
+        .historical-card h5 {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .variance-higher {
+            font-weight: bold;
+            color: #dc2626;
+        }
+
+        .variance-lower {
+            font-weight: bold;
+            color: #16a34a;
+        }
+
+        .reference-section {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .reference-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .reference-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .reference-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.875rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .spinner {
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
             animation: spin 1s linear infinite;
         }
+
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .auto-calculated {
+            background-color: #dcfce7;
+            color: #166534;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        .analysis-complete {
+            background-color: #dcfce7;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #166534;
+            margin-top: 0.75rem;
+        }
+
+        .file-info {
+            margin-top: 0.75rem;
+        }
+
+        .file-info p {
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .file-info .file-size {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .loading-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #3b82f6;
+            margin-top: 0.75rem;
         }
     </style>
 </head>
 <body>
-    <div id="app"></div>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i data-lucide="thermometer"></i>
+                HVAC Budget Estimator
+            </h1>
+            <p>Generate accurate HVAC cost estimates with AI drawing analysis & labor curves</p>
+            <p class="subtitle">Based on 168 historical projects • Automated room detection • Advanced labor scheduling</p>
+        </div>
 
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <div class="main-grid">
+            <!-- Input Panel -->
+            <div class="card">
+                <div class="card-header">
+                    <i data-lucide="file-text"></i>
+                    Project Information
+                </div>
 
-    <script type="text/babel">
-        const { useState, useRef } = React;
+                <div class="form-group">
+                    <label class="form-label">Project Name</label>
+                    <input type="text" class="form-input" id="projectName" placeholder="Enter project name">
+                </div>
 
-        // Icons as SVG components
-        const Upload = () => (
-            <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-        );
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-input" id="projectLocation" placeholder="Enter project location">
+                </div>
 
-        const Calculator = () => (
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-        );
+                <div class="form-group">
+                    <label class="form-label">
+                        Square Footage *
+                        <span class="auto-calculated hidden" id="autoCalculated">Auto-calculated</span>
+                    </label>
+                    <input type="number" class="form-input" id="squareFootage" placeholder="Enter square footage">
+                </div>
 
-        const FileText = () => (
-            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-        );
+                <div class="form-group">
+                    <label class="form-label">Building Type *</label>
+                    <select class="form-select" id="buildingType">
+                        <option value="">Select building type</option>
+                        <option value="New">New ($33.31/sq ft avg, 91 projects)</option>
+                        <option value="Addition">Addition ($49.53/sq ft avg, 22 projects)</option>
+                        <option value="Remodel">Remodel ($30.62/sq ft avg, 23 projects)</option>
+                        <option value="Addition/Remodel">Addition/Remodel ($43.15/sq ft avg, 22 projects)</option>
+                        <option value="Buildout">Buildout ($47.63/sq ft avg, 2 projects)</option>
+                    </select>
+                </div>
 
-        const DollarSign = () => (
-            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-            </svg>
-        );
+                <div class="form-group">
+                    <label class="form-label">Project Type *</label>
+                    <select class="form-select" id="projectType">
+                        <option value="">Select project type</option>
+                        <option value="School">School ($31.34/sq ft avg, 28 projects)</option>
+                        <option value="Healthcare - Hospital">Healthcare - Hospital ($66.59/sq ft avg, 11 projects)</option>
+                        <option value="Healthcare - Clinic">Healthcare - Clinic ($36.38/sq ft avg, 27 projects)</option>
+                        <option value="Office">Office ($31.80/sq ft avg, 23 projects)</option>
+                        <option value="Laboratory">Laboratory ($67.50/sq ft avg, 2 projects)</option>
+                        <option value="Science Lab">Science Lab ($83.26/sq ft avg, 4 projects)</option>
+                        <option value="Healthcare - Nursing Home">Healthcare - Nursing Home ($41.80/sq ft avg, 6 projects)</option>
+                        <option value="Athletic Facility">Athletic Facility ($23.82/sq ft avg, 4 projects)</option>
+                        <option value="Hotel">Hotel ($26.46/sq ft avg, 8 projects)</option>
+                        <option value="Museum">Museum ($44.42/sq ft avg, 3 projects)</option>
+                        <option value="Community Center">Community Center ($39.18/sq ft avg, 3 projects)</option>
+                        <option value="Data Center">Data Center ($182.63/sq ft avg, 1 projects)</option>
+                        <option value="Restaurant">Restaurant ($46.76/sq ft avg, 1 projects)</option>
+                        <option value="Church">Church ($14.20/sq ft avg, 1 projects)</option>
+                        <option value="Fire Station">Fire Station ($11.39/sq ft avg, 1 projects)</option>
+                        <option value="Office/Warehouse">Office/Warehouse ($6.58/sq ft avg, 3 projects)</option>
+                        <option value="Retail Store">Retail Store ($6.79/sq ft avg, 1 projects)</option>
+                    </select>
+                </div>
 
-        const Building = () => (
-            <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-        );
+                <!-- Project Schedule Section -->
+                <div class="schedule-section">
+                    <div class="schedule-header">📅 Project Schedule (Optional)</div>
+                    <div class="schedule-grid">
+                        <div>
+                            <label class="form-label">Start Date</label>
+                            <input type="date" class="form-input" id="startDate">
+                        </div>
+                        <div>
+                            <label class="form-label">End Date</label>
+                            <input type="date" class="form-input" id="endDate">
+                        </div>
+                    </div>
+                    <div class="schedule-grid" style="margin-top: 0.75rem;">
+                        <div>
+                            <label class="form-label">Working Days/Week</label>
+                            <select class="form-select" id="workingDays">
+                                <option value="5">5 days (Mon-Fri)</option>
+                                <option value="6">6 days (Mon-Sat)</option>
+                                <option value="7">7 days (Full week)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Hours/Day</label>
+                            <select class="form-select" id="hoursPerDay">
+                                <option value="8">8 hours (Standard)</option>
+                                <option value="10">10 hours (Extended)</option>
+                                <option value="12">12 hours (Overtime)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #a16207; margin-top: 0.5rem;">
+                        💡 Adding dates enables detailed labor curve analysis showing daily worker allocation and costs
+                    </div>
+                </div>
 
-        const Thermometer = () => (
-            <svg className="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-        );
+                <!-- File Upload -->
+                <div class="form-group">
+                    <label class="form-label">Upload Architectural Drawing (Optional)</label>
+                    <div class="upload-info">
+                        <h4>🎯 What the Drawing Upload Does:</h4>
+                        <ul>
+                            <li>• <strong>Automatic Room Detection:</strong> AI analyzes your drawing to identify different room types</li>
+                            <li>• <strong>Smart Area Calculation:</strong> Calculates total square footage automatically</li>
+                            <li>• <strong>Room-Specific HVAC Costs:</strong> Applies different cost multipliers based on room function</li>
+                            <li>• <strong>More Accurate Estimates:</strong> Server rooms, labs, and kitchens have higher HVAC requirements</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div id="uploadContent">
+                            <i data-lucide="upload" style="width: 3rem; height: 3rem; color: #9ca3af; margin: 0 auto 1rem;"></i>
+                            <p style="color: #6b7280; margin-bottom: 0.5rem;">Click to upload drawing</p>
+                            <p style="font-size: 0.875rem; color: #9ca3af;">PDF, JPG, PNG, DWG files supported</p>
+                        </div>
+                        <div id="fileInfo" class="hidden">
+                            <!-- File info will be populated here -->
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.dwg" class="hidden">
+                </div>
 
-        const Download = () => (
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-        );
+                <div class="form-group">
+                    <label class="form-label">Additional Notes</label>
+                    <textarea class="form-textarea" id="projectNotes" rows="3" placeholder="Special requirements, existing conditions, etc."></textarea>
+                </div>
 
-        const Trash2 = () => (
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-        );
+                <button class="btn btn-primary" onclick="generateEstimate()">
+                    <i data-lucide="calculator"></i>
+                    Generate Enhanced Estimate
+                </button>
+            </div>
 
-        const CheckCircle = () => (
-            <svg className="w-12 h-12 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        );
+            <!-- Results Panel -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div class="card-header" style="margin-bottom: 0;">
+                        <i data-lucide="dollar-sign"></i>
+                        Cost Estimate
+                    </div>
+                    <button class="btn btn-secondary hidden" id="exportBtn" onclick="exportToExcel()">
+                        <i data-lucide="download"></i>
+                        Export to Excel
+                    </button>
+                </div>
 
-        const HVACEstimator = () => {
-            const [project, setProject] = useState({
-                name: '',
-                location: '',
-                squareFootage: '',
-                buildingType: '',
-                projectType: '',
-                notes: ''
-            });
+                <div id="resultsEmpty" class="results-empty">
+                    <i data-lucide="building" style="width: 4rem; height: 4rem; color: #d1d5db; margin: 0 auto 1rem;"></i>
+                    <p>Complete the form and click "Generate Enhanced Estimate"</p>
+                </div>
 
-            const [uploadedFile, setUploadedFile] = useState(null);
-            const [roomAnalysis, setRoomAnalysis] = useState(null);
-            const [estimate, setEstimate] = useState(null);
-            const [isAnalyzing, setIsAnalyzing] = useState(false);
-            const [laborSchedule, setLaborSchedule] = useState(null);
-            const [showLaborCurve, setShowLaborCurve] = useState(false);
-            const fileInputRef = useRef(null);
+                <div id="resultsContent" class="hidden">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </div>
 
-            // Historical data
-            const projectTypes = [
-                { name: 'School', avgCost: 31.34, projects: 28 },
-                { name: 'Healthcare - Hospital', avgCost: 66.59, projects: 11 },
-                { name: 'Healthcare - Clinic', avgCost: 36.38, projects: 27 },
-                { name: 'Office', avgCost: 31.80, projects: 23 },
-                { name: 'Laboratory', avgCost: 67.50, projects: 2 },
-                { name: 'Science Lab', avgCost: 83.26, projects: 4 },
-                { name: 'Healthcare - Nursing Home', avgCost: 41.80, projects: 6 },
-                { name: 'Athletic Facility', avgCost: 23.82, projects: 4 },
-                { name: 'Hotel', avgCost: 26.46, projects: 8 },
-                { name: 'Museum', avgCost: 44.42, projects: 3 },
-                { name: 'Community Center', avgCost: 39.18, projects: 3 },
-                { name: 'Data Center', avgCost: 182.63, projects: 1 },
-                { name: 'Restaurant', avgCost: 46.76, projects: 1 },
-                { name: 'Church', avgCost: 14.20, projects: 1 },
-                { name: 'Fire Station', avgCost: 11.39, projects: 1 },
-                { name: 'Office/Warehouse', avgCost: 6.58, projects: 3 },
-                { name: 'Retail Store', avgCost: 6.79, projects: 1 }
-            ];
+        <!-- Historical Reference -->
+        <div class="reference-section">
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: #1f2937; margin-bottom: 1rem;">Historical Data Reference</h3>
+            <div class="reference-grid">
+                <div>
+                    <h4 style="font-weight: 500; color: #374151; margin-bottom: 0.75rem;">Project Types (Top 10)</h4>
+                    <ul class="reference-list">
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">School</span>
+                            <span style="font-weight: 500;">$31.34/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Healthcare - Hospital</span>
+                            <span style="font-weight: 500;">$66.59/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Healthcare - Clinic</span>
+                            <span style="font-weight: 500;">$36.38/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Office</span>
+                            <span style="font-weight: 500;">$31.80/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Laboratory</span>
+                            <span style="font-weight: 500;">$67.50/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Science Lab</span>
+                            <span style="font-weight: 500;">$83.26/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Healthcare - Nursing Home</span>
+                            <span style="font-weight: 500;">$41.80/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Athletic Facility</span>
+                            <span style="font-weight: 500;">$23.82/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Hotel</span>
+                            <span style="font-weight: 500;">$26.46/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Museum</span>
+                            <span style="font-weight: 500;">$44.42/sq ft</span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="font-weight: 500; color: #374151; margin-bottom: 0.75rem;">Building Types</h4>
+                    <ul class="reference-list">
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">New</span>
+                            <span style="font-weight: 500;">$33.31/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Addition</span>
+                            <span style="font-weight: 500;">$49.53/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Remodel</span>
+                            <span style="font-weight: 500;">$30.62/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Addition/Remodel</span>
+                            <span style="font-weight: 500;">$43.15/sq ft</span>
+                        </li>
+                        <li class="reference-item">
+                            <span style="color: #6b7280;">Buildout</span>
+                            <span style="font-weight: 500;">$47.63/sq ft</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            const buildingTypes = [
-                { name: 'New', avgCost: 33.31, projects: 91 },
-                { name: 'Addition', avgCost: 49.53, projects: 22 },
-                { name: 'Remodel', avgCost: 30.62, projects: 23 },
-                { name: 'Addition/Remodel', avgCost: 43.15, projects: 22 },
-                { name: 'Buildout', avgCost: 47.63, projects: 2 }
-            ];
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
 
-            const handleFileUpload = (event) => {
-                const file = event.target.files[0];
-                if (!file) return;
+        // Global state
+        let roomAnalysis = null;
+        let currentEstimate = null;
+        let uploadedFile = null;
 
-                setUploadedFile(file);
-                analyzeDrawing(file);
-            };
+        // Historical data
+        const projectTypes = [
+            { name: 'School', avgCost: 31.34, projects: 28 },
+            { name: 'Healthcare - Hospital', avgCost: 66.59, projects: 11 },
+            { name: 'Healthcare - Clinic', avgCost: 36.38, projects: 27 },
+            { name: 'Office', avgCost: 31.80, projects: 23 },
+            { name: 'Laboratory', avgCost: 67.50, projects: 2 },
+            { name: 'Science Lab', avgCost: 83.26, projects: 4 },
+            { name: 'Healthcare - Nursing Home', avgCost: 41.80, projects: 6 },
+            { name: 'Athletic Facility', avgCost: 23.82, projects: 4 },
+            { name: 'Hotel', avgCost: 26.46, projects: 8 },
+            { name: 'Museum', avgCost: 44.42, projects: 3 },
+            { name: 'Community Center', avgCost: 39.18, projects: 3 },
+            { name: 'Data Center', avgCost: 182.63, projects: 1 },
+            { name: 'Restaurant', avgCost: 46.76, projects: 1 },
+            { name: 'Church', avgCost: 14.20, projects: 1 },
+            { name: 'Fire Station', avgCost: 11.39, projects: 1 },
+            { name: 'Office/Warehouse', avgCost: 6.58, projects: 3 },
+            { name: 'Retail Store', avgCost: 6.79, projects: 1 }
+        ];
 
-            const analyzeDrawing = (file) => {
-                setIsAnalyzing(true);
+        const buildingTypes = [
+            { name: 'New', avgCost: 33.31, projects: 91 },
+            { name: 'Addition', avgCost: 49.53, projects: 22 },
+            { name: 'Remodel', avgCost: 30.62, projects: 23 },
+            { name: 'Addition/Remodel', avgCost: 43.15, projects: 22 },
+            { name: 'Buildout', avgCost: 47.63, projects: 2 }
+        ];
+
+        // File upload handling
+        document.getElementById('uploadArea').addEventListener('click', () => {
+            if (!uploadedFile) {
+                document.getElementById('fileInput').click();
+            }
+        });
+
+        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            uploadedFile = file;
+            showFileInfo(file);
+            analyzeDrawing(file);
+        }
+
+        function showFileInfo(file) {
+            const uploadContent = document.getElementById('uploadContent');
+            const fileInfo = document.getElementById('fileInfo');
+            
+            uploadContent.classList.add('hidden');
+            fileInfo.classList.remove('hidden');
+            
+            fileInfo.innerHTML = `
+                <div style="text-align: center;">
+                    <i data-lucide="check-circle" style="width: 3rem; height: 3rem; color: #16a34a; margin: 0 auto 0.75rem;"></i>
+                    <div class="file-info">
+                        <p>${file.name}</p>
+                        <p class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                    <div id="analysisStatus">
+                        <div class="loading-text">
+                            <div class="spinner"></div>
+                            <span>Analyzing rooms and calculating areas...</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="clearFile()" style="margin-top: 0.75rem;">
+                        <i data-lucide="trash-2"></i>
+                        Remove file and use manual entry
+                    </button>
+                </div>
+            `;
+            
+            lucide.createIcons();
+        }
+
+        function analyzeDrawing(file) {
+            setTimeout(() => {
+                const fileName = file.name.toLowerCase();
                 
-                setTimeout(() => {
-                    const fileName = file.name.toLowerCase();
-                    
-                    const detectedScales = ['1/4" = 1\'', '1/8" = 1\'', '1/16" = 1\''];
-                    const detectedScale = detectedScales[Math.floor(Math.random() * detectedScales.length)];
-                    
-                    let scaleRatio = 48;
-                    if (detectedScale.includes('1/8"')) scaleRatio = 96;
-                    else if (detectedScale.includes('1/16"')) scaleRatio = 192;
-                    
-                    let buildingLength, buildingWidth, detectedRooms;
-                    
-                    if (fileName.includes('hospital') || fileName.includes('medical')) {
-                        buildingLength = 200;
-                        buildingWidth = 150;
-                        detectedRooms = [
-                            { name: 'Patient Room 101', type: 'Patient Room', area: 280 },
-                            { name: 'Surgery Suite A', type: 'Surgery', area: 500 },
-                            { name: 'Laboratory', type: 'Laboratory', area: 750 },
-                            { name: 'ICU Room 1', type: 'ICU', area: 288 },
-                            { name: 'Emergency Room', type: 'Emergency', area: 1200 },
-                            { name: 'Main Corridor', type: 'Corridor', area: 1440 }
-                        ];
-                    } else if (fileName.includes('office')) {
-                        buildingLength = 120;
-                        buildingWidth = 80;
-                        detectedRooms = [
-                            { name: 'Office 101', type: 'Office', area: 180 },
-                            { name: 'Conference Room A', type: 'Conference', area: 320 },
-                            { name: 'Reception Area', type: 'Reception', area: 240 },
-                            { name: 'Server Room', type: 'Server Room', area: 80 },
-                            { name: 'Main Corridor', type: 'Corridor', area: 600 }
-                        ];
-                    } else {
-                        buildingLength = 100;
-                        buildingWidth = 60;
-                        detectedRooms = [
-                            { name: 'Main Space', type: 'Office', area: 1200 },
-                            { name: 'Conference Room', type: 'Conference', area: 300 },
-                            { name: 'Reception', type: 'Reception', area: 150 },
-                            { name: 'Storage', type: 'Storage', area: 80 }
-                        ];
-                    }
+                let detectedRooms;
+                
+                if (fileName.includes('hospital') || fileName.includes('medical')) {
+                    detectedRooms = [
+                        { name: 'Patient Room 101', type: 'Patient Room', area: 280 },
+                        { name: 'Surgery Suite A', type: 'Surgery', area: 500 },
+                        { name: 'Laboratory', type: 'Laboratory', area: 750 },
+                        { name: 'ICU Room 1', type: 'ICU', area: 288 },
+                        { name: 'Emergency Room', type: 'Emergency', area: 1200 },
+                        { name: 'Main Corridor', type: 'Corridor', area: 1440 }
+                    ];
+                } else if (fileName.includes('office')) {
+                    detectedRooms = [
+                        { name: 'Office 101', type: 'Office', area: 180 },
+                        { name: 'Conference Room A', type: 'Conference', area: 320 },
+                        { name: 'Reception Area', type: 'Reception', area: 240 },
+                        { name: 'Server Room', type: 'Server Room', area: 80 },
+                        { name: 'Main Corridor', type: 'Corridor', area: 600 }
+                    ];
+                } else {
+                    detectedRooms = [
+                        { name: 'Main Space', type: 'Office', area: 1200 },
+                        { name: 'Conference Room', type: 'Conference', area: 300 },
+                        { name: 'Reception', type: 'Reception', area: 150 },
+                        { name: 'Storage', type: 'Storage', area: 80 }
+                    ];
+                }
 
-                    const roomsWithMultipliers = detectedRooms.map(room => ({
-                        ...room,
-                        hvacMultiplier: getHVACMultiplier(room.type)
-                    }));
+                const roomsWithMultipliers = detectedRooms.map(room => ({
+                    ...room,
+                    hvacMultiplier: getHVACMultiplier(room.type)
+                }));
 
-                    const calculatedArea = roomsWithMultipliers.reduce((sum, room) => sum + room.area, 0);
-                    
-                    const analysis = {
-                        totalArea: calculatedArea,
-                        buildingDimensions: {
-                            length: buildingLength,
-                            width: buildingWidth,
-                            totalArea: buildingLength * buildingWidth
-                        },
-                        detectedScale: detectedScale,
-                        scaleRatio: scaleRatio,
-                        rooms: roomsWithMultipliers,
-                        roomTypes: roomsWithMultipliers.reduce((acc, room) => {
-                            if (!acc[room.type]) {
-                                acc[room.type] = { count: 0, totalArea: 0, rooms: [] };
-                            }
-                            acc[room.type].count++;
-                            acc[room.type].totalArea += room.area;
-                            acc[room.type].rooms.push(room.name);
-                            return acc;
-                        }, {}),
-                        fileName: file.name,
-                        analysisDate: new Date().toLocaleDateString(),
-                        measurementAccuracy: 'High'
-                    };
-
-                    setRoomAnalysis(analysis);
-                    setProject(prev => ({ ...prev, squareFootage: calculatedArea.toString() }));
-                    setIsAnalyzing(false);
-                }, 3000);
-            };
-
-            const getHVACMultiplier = (roomType) => {
-                const multipliers = {
-                    'Server Room': 4.0,
-                    'Surgery': 2.5,
-                    'Laboratory': 2.5,
-                    'ICU': 1.8,
-                    'Patient Room': 1.8,
-                    'Emergency': 1.6,
-                    'Conference': 1.2,
-                    'Office': 1.0,
-                    'Reception': 0.8,
-                    'Corridor': 0.3,
-                    'Storage': 0.3
-                };
-                return multipliers[roomType] || 1.0;
-            };
-
-            // Enhanced labor calculation with detailed trades and scheduling
-            const calculateDetailedLabor = (sqft, totalCost) => {
-                // Define detailed labor trades with hours per 1000 sq ft and sequencing
-                const laborTrades = {
-                    'Demolition': {
-                        hoursPerKSF: 8,
-                        rate: 45,
-                        sequence: 1,
-                        duration: 3, // days
-                        crew: 2,
-                        description: 'Remove existing HVAC equipment and ductwork'
-                    },
-                    'Site Preparation': {
-                        hoursPerKSF: 4,
-                        rate: 50,
-                        sequence: 2,
-                        duration: 2,
-                        crew: 3,
-                        description: 'Site setup, material staging, safety prep'
-                    },
-                    'Equipment Installation': {
-                        hoursPerKSF: 15,
-                        rate: 85,
-                        sequence: 3,
-                        duration: 8,
-                        crew: 4,
-                        description: 'Install RTUs, AHUs, boilers, chillers'
-                    },
-                    'Rough Piping': {
-                        hoursPerKSF: 25,
-                        rate: 75,
-                        sequence: 4,
-                        duration: 12,
-                        crew: 6,
-                        description: 'Install main piping runs, risers, distribution'
-                    },
-                    'Rough Ductwork': {
-                        hoursPerKSF: 35,
-                        rate: 65,
-                        sequence: 5,
-                        duration: 15,
-                        crew: 8,
-                        description: 'Install main ductwork, trunk lines'
-                    },
-                    'Branch Piping': {
-                        hoursPerKSF: 18,
-                        rate: 75,
-                        sequence: 6,
-                        duration: 10,
-                        crew: 4,
-                        description: 'Install branch piping, connections'
-                    },
-                    'Branch Ductwork': {
-                        hoursPerKSF: 28,
-                        rate: 65,
-                        sequence: 7,
-                        duration: 12,
-                        crew: 6,
-                        description: 'Install branch ductwork, flex connections'
-                    },
-                    'Electrical Rough-In': {
-                        hoursPerKSF: 12,
-                        rate: 80,
-                        sequence: 8,
-                        duration: 8,
-                        crew: 3,
-                        description: 'Install electrical feeds, panels, conduit'
-                    },
-                    'Controls Installation': {
-                        hoursPerKSF: 20,
-                        rate: 90,
-                        sequence: 9,
-                        duration: 10,
-                        crew: 3,
-                        description: 'Install BMS, sensors, actuators'
-                    },
-                    'Insulation': {
-                        hoursPerKSF: 15,
-                        rate: 55,
-                        sequence: 10,
-                        duration: 6,
-                        crew: 4,
-                        description: 'Insulate piping and ductwork'
-                    },
-                    'Air Devices': {
-                        hoursPerKSF: 10,
-                        rate: 60,
-                        sequence: 11,
-                        duration: 5,
-                        crew: 3,
-                        description: 'Install diffusers, grilles, registers'
-                    },
-                    'Controls Programming': {
-                        hoursPerKSF: 8,
-                        rate: 110,
-                        sequence: 12,
-                        duration: 6,
-                        crew: 2,
-                        description: 'Program BMS, commission controls'
-                    },
-                    'Testing & Balancing': {
-                        hoursPerKSF: 12,
-                        rate: 95,
-                        sequence: 13,
-                        duration: 8,
-                        crew: 2,
-                        description: 'Test all systems, balance airflow'
-                    },
-                    'Final Commissioning': {
-                        hoursPerKSF: 6,
-                        rate: 105,
-                        sequence: 14,
-                        duration: 4,
-                        crew: 3,
-                        description: 'Final testing, documentation, training'
-                    },
-                    'Cleanup & Closeout': {
-                        hoursPerKSF: 3,
-                        rate: 45,
-                        sequence: 15,
-                        duration: 2,
-                        crew: 3,
-                        description: 'Final cleanup, documentation turnover'
-                    }
+                const calculatedArea = roomsWithMultipliers.reduce((sum, room) => sum + room.area, 0);
+                
+                roomAnalysis = {
+                    totalArea: calculatedArea,
+                    rooms: roomsWithMultipliers,
+                    fileName: file.name,
+                    analysisDate: new Date().toLocaleDateString()
                 };
 
-                // Calculate labor details
-                const kSqft = sqft / 1000;
-                const laborDetails = {};
+                document.getElementById('squareFootage').value = calculatedArea;
+                document.getElementById('squareFootage').disabled = true;
+                document.getElementById('autoCalculated').classList.remove('hidden');
 
-                Object.entries(laborTrades).forEach(([trade, data]) => {
-                    const totalHours = data.hoursPerKSF * kSqft;
-                    const laborCost = totalHours * data.rate;
+                // Update analysis status
+                document.getElementById('analysisStatus').innerHTML = `
+                    <div class="analysis-complete">
+                        ✅ Advanced Analysis Complete!
+                        <div style="margin-top: 0.25rem;">
+                            <strong>Rooms:</strong> ${roomAnalysis.rooms.length} detected • ${roomAnalysis.totalArea.toLocaleString()} sq ft total
+                        </div>
+                    </div>
+                `;
+            }, 3000);
+        }
+
+        function getHVACMultiplier(roomType) {
+            const multipliers = {
+                'Server Room': 4.0,
+                'Surgery': 2.5,
+                'Laboratory': 2.5,
+                'ICU': 1.8,
+                'Patient Room': 1.8,
+                'Emergency': 1.6,
+                'Conference': 1.2,
+                'Office': 1.0,
+                'Reception': 0.8,
+                'Corridor': 0.3,
+                'Storage': 0.3
+            };
+            return multipliers[roomType] || 1.0;
+        }
+
+        function clearFile() {
+            uploadedFile = null;
+            roomAnalysis = null;
+            
+            document.getElementById('fileInput').value = '';
+            document.getElementById('squareFootage').value = '';
+            document.getElementById('squareFootage').disabled = false;
+            document.getElementById('autoCalculated').classList.add('hidden');
+            
+            const uploadContent = document.getElementById('uploadContent');
+            const fileInfo = document.getElementById('fileInfo');
+            
+            uploadContent.classList.remove('hidden');
+            fileInfo.classList.add('hidden');
+            
+            lucide.createIcons();
+        }
+
+        function generateEstimate() {
+            const squareFootage = document.getElementById('squareFootage').value;
+            const buildingType = document.getElementById('buildingType').value;
+            const projectType = document.getElementById('projectType').value;
+
+            if (!squareFootage || !buildingType || !projectType) {
+                alert('Please fill in Square Footage, Building Type, and Project Type');
+                return;
+            }
+
+            const project = {
+                name: document.getElementById('projectName').value || 'Unnamed Project',
+                location: document.getElementById('projectLocation').value,
+                squareFootage: squareFootage,
+                buildingType: buildingType,
+                projectType: projectType,
+                notes: document.getElementById('projectNotes').value
+            };
+
+            const sqft = parseFloat(squareFootage);
+            const selectedProjectType = projectTypes.find(type => type.name === projectType);
+            const selectedBuildingType = buildingTypes.find(type => type.name === buildingType);
+
+            let baseCostPerSqft = selectedProjectType?.avgCost || 36.85;
+            const buildingMultiplier = selectedBuildingType ? selectedBuildingType.avgCost / 36.85 : 1.0;
+            let adjustedCostPerSqft = baseCostPerSqft * buildingMultiplier;
+
+            if (roomAnalysis) {
+                let weightedTotal = 0;
+                roomAnalysis.rooms.forEach(room => {
+                    const roomCost = adjustedCostPerSqft * room.hvacMultiplier;
+                    weightedTotal += roomCost * room.area;
+                });
+                adjustedCostPerSqft = weightedTotal / roomAnalysis.totalArea;
+            }
+
+            const totalCost = sqft * adjustedCostPerSqft;
+
+            const breakdown = {
+                equipment: { total: totalCost * 0.35 },
+                sheetMetal: { total: totalCost * 0.25 },
+                piping: { total: totalCost * 0.15 },
+                controls: { total: totalCost * 0.10 },
+                labor: { total: totalCost * 0.20 },
+                overhead: { total: totalCost * 0.15 }
+            };
+
+            let roomCosts = null;
+            if (roomAnalysis) {
+                roomCosts = {};
+                const roomTypes = roomAnalysis.rooms.reduce((acc, room) => {
+                    if (!acc[room.type]) {
+                        acc[room.type] = { count: 0, totalArea: 0, rooms: [] };
+                    }
+                    acc[room.type].count++;
+                    acc[room.type].totalArea += room.area;
+                    acc[room.type].rooms.push(room.name);
+                    return acc;
+                }, {});
+
+                Object.entries(roomTypes).forEach(([roomType, data]) => {
+                    const avgMultiplier = roomAnalysis.rooms
+                        .filter(room => room.type === roomType)
+                        .reduce((sum, room) => sum + room.hvacMultiplier, 0) / data.count;
                     
-                    laborDetails[trade] = {
-                        ...data,
-                        totalHours: Math.round(totalHours),
-                        laborCost: Math.round(laborCost),
-                        dailyHours: Math.round(totalHours / data.duration),
-                        totalCrew: data.crew
+                    const roomCostPerSqft = adjustedCostPerSqft * avgMultiplier;
+                    roomCosts[roomType] = {
+                        area: data.totalArea,
+                        costPerSqft: roomCostPerSqft,
+                        totalCost: data.totalArea * roomCostPerSqft,
+                        rooms: data.rooms
                     };
                 });
+            }
 
-                return laborDetails;
+            currentEstimate = {
+                project,
+                totalCost,
+                costPerSqft: adjustedCostPerSqft,
+                breakdown,
+                roomCosts,
+                confidence: selectedProjectType?.projects > 5 ? 'High' : selectedProjectType?.projects > 1 ? 'Medium' : 'Low',
+                generatedDate: new Date().toLocaleDateString()
             };
 
-            // Generate labor curve data based on project schedule
-            const generateLaborCurve = (laborDetails, startDate, endDate, workingDays, hoursPerDay) => {
-                if (!startDate || !endDate) return null;
+            displayResults(currentEstimate);
+        }
 
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-                
-                // Create daily labor curve
-                const laborCurve = [];
-                const tradeSchedule = [];
-                
-                let currentDate = new Date(start);
-                let workDay = 0;
-                
-                // Calculate trade start dates based on sequence
-                const trades = Object.entries(laborDetails).sort((a, b) => a[1].sequence - b[1].sequence);
-                let cumulativeDays = 0;
-                
-                trades.forEach(([tradeName, trade]) => {
-                    const tradeStartDay = cumulativeDays;
-                    const tradeEndDay = cumulativeDays + trade.duration - 1;
-                    
-                    tradeSchedule.push({
-                        trade: tradeName,
-                        startDay: tradeStartDay,
-                        endDay: tradeEndDay,
-                        totalHours: trade.totalHours,
-                        crew: trade.totalCrew,
-                        rate: trade.rate,
-                        dailyHours: trade.dailyHours,
-                        description: trade.description
-                    });
-                    
-                    // Allow 20% overlap with next trade
-                    cumulativeDays += Math.round(trade.duration * 0.8);
-                });
+        function displayResults(estimate) {
+            document.getElementById('resultsEmpty').classList.add('hidden');
+            document.getElementById('resultsContent').classList.remove('hidden');
+            document.getElementById('exportBtn').classList.remove('hidden');
 
-                // Generate daily labor data
-                for (let day = 0; day <= totalDays; day++) {
-                    if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) { // Skip weekends
-                        const dailyData = {
-                            date: new Date(currentDate).toLocaleDateString(),
-                            workDay: workDay + 1,
-                            totalWorkers: 0,
-                            totalHours: 0,
-                            totalCost: 0,
-                            trades: []
-                        };
-
-                        // Check which trades are active on this day
-                        tradeSchedule.forEach(trade => {
-                            if (workDay >= trade.startDay && workDay <= trade.endDay) {
-                                const tradeProgress = (workDay - trade.startDay) / (trade.endDay - trade.startDay);
-                                const efficiency = Math.sin(tradeProgress * Math.PI) * 0.3 + 0.85; // Bell curve efficiency
-                                
-                                const dailyWorkers = trade.crew;
-                                const dailyHours = Math.round(trade.dailyHours * efficiency);
-                                const dailyCost = dailyHours * trade.rate;
-
-                                dailyData.trades.push({
-                                    name: trade.trade,
-                                    workers: dailyWorkers,
-                                    hours: dailyHours,
-                                    cost: dailyCost,
-                                    progress: Math.round(tradeProgress * 100)
-                                });
-
-                                dailyData.totalWorkers += dailyWorkers;
-                                dailyData.totalHours += dailyHours;
-                                dailyData.totalCost += dailyCost;
-                            }
-                        });
-
-                        laborCurve.push(dailyData);
-                        workDay++;
-                    }
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
-
-                return {
-                    laborCurve,
-                    tradeSchedule,
-                    summary: {
-                        totalWorkDays: workDay,
-                        peakWorkers: Math.max(...laborCurve.map(d => d.totalWorkers)),
-                        averageWorkers: Math.round(laborCurve.reduce((sum, d) => sum + d.totalWorkers, 0) / laborCurve.length),
-                        totalLaborHours: laborCurve.reduce((sum, d) => sum + d.totalHours, 0),
-                        totalLaborCost: laborCurve.reduce((sum, d) => sum + d.totalCost, 0)
-                    }
-                };
-            };
-
-            const generateEstimate = () => {
-                if (!project.squareFootage || !project.buildingType || !project.projectType) {
-                    alert('Please fill in Square Footage, Building Type, and Project Type');
-                    return;
-                }
-
-                const sqft = parseFloat(project.squareFootage);
-                const selectedProjectType = projectTypes.find(type => type.name === project.projectType);
-                const selectedBuildingType = buildingTypes.find(type => type.name === project.buildingType);
-
-                let baseCostPerSqft = selectedProjectType?.avgCost || 36.85;
-                const buildingMultiplier = selectedBuildingType ? selectedBuildingType.avgCost / 36.85 : 1.0;
-                let adjustedCostPerSqft = baseCostPerSqft * buildingMultiplier;
-
-                if (roomAnalysis) {
-                    let weightedTotal = 0;
-                    roomAnalysis.rooms.forEach(room => {
-                        const roomCost = adjustedCostPerSqft * room.hvacMultiplier;
-                        weightedTotal += roomCost * room.area;
-                    });
-                    adjustedCostPerSqft = weightedTotal / roomAnalysis.totalArea;
-                }
-
-                const totalCost = sqft * adjustedCostPerSqft;
-
-                // Generate detailed labor analysis
-                const detailedLabor = calculateDetailedLabor(sqft, totalCost);
-
-                const breakdown = {
-                    equipment: {
-                        total: totalCost * 0.35,
-                        items: {
-                            hvacUnits: totalCost * 0.15,
-                            boilers: totalCost * 0.08,
-                            chillers: totalCost * 0.07,
-                            pumps: totalCost * 0.03,
-                            coolingTowers: totalCost * 0.02
-                        }
-                    },
-                    sheetMetal: {
-                        total: totalCost * 0.25,
-                        items: {
-                            supplyDuct: totalCost * 0.10,
-                            returnDuct: totalCost * 0.08,
-                            exhaustDuct: totalCost * 0.03,
-                            diffusers: totalCost * 0.02,
-                            dampers: totalCost * 0.02
-                        }
-                    },
-                    piping: {
-                        total: totalCost * 0.15,
-                        items: {
-                            heatingPipe: totalCost * 0.06,
-                            chilledWater: totalCost * 0.05,
-                            condensate: totalCost * 0.02,
-                            insulation: totalCost * 0.02
-                        }
-                    },
-                    controls: {
-                        total: totalCost * 0.10,
-                        items: {
-                            bms: totalCost * 0.04,
-                            sensors: totalCost * 0.02,
-                            actuators: totalCost * 0.02,
-                            electrical: totalCost * 0.02
-                        }
-                    },
-                    labor: {
-                        total: totalCost * 0.20,
-                        items: {
-                            sheetMetalLabor: totalCost * 0.08,
-                            pipingLabor: totalCost * 0.06,
-                            equipmentLabor: totalCost * 0.04,
-                            electricalLabor: totalCost * 0.02
-                        }
-                    },
-                    overhead: {
-                        total: totalCost * 0.15,
-                        items: {
-                            generalConditions: totalCost * 0.05,
-                            bonds: totalCost * 0.01,
-                            permits: totalCost * 0.01,
-                            testing: totalCost * 0.02,
-                            contingency: totalCost * 0.03,
-                            profit: totalCost * 0.03
-                        }
-                    }
-                };
-
-                let roomCosts = null;
-                if (roomAnalysis) {
-                    roomCosts = {};
-                    Object.entries(roomAnalysis.roomTypes).forEach(([roomType, data]) => {
-                        const avgMultiplier = roomAnalysis.rooms
-                            .filter(room => room.type === roomType)
-                            .reduce((sum, room) => sum + room.hvacMultiplier, 0) / data.count;
-                        
-                        const roomCostPerSqft = adjustedCostPerSqft * avgMultiplier;
-                        roomCosts[roomType] = {
-                            area: data.totalArea,
-                            costPerSqft: roomCostPerSqft,
-                            totalCost: data.totalArea * roomCostPerSqft,
-                            rooms: data.rooms
-                        };
-                    });
-                }
-
-                const newEstimate = {
-                    project: { ...project },
-                    totalCost,
-                    costPerSqft: adjustedCostPerSqft,
-                    lowEstimate: totalCost * 0.8,
-                    highEstimate: totalCost * 1.2,
-                    breakdown,
-                    roomCosts,
-                    detailedLabor,
-                    confidence: selectedProjectType?.projects > 5 ? 'High' : selectedProjectType?.projects > 1 ? 'Medium' : 'Low',
-                    generatedDate: new Date().toLocaleDateString()
-                };
-
-                setEstimate(newEstimate);
-
-                // Generate labor curve if schedule dates are provided
-                if (projectSchedule.startDate && projectSchedule.endDate) {
-                    const curve = generateLaborCurve(
-                        detailedLabor, 
-                        projectSchedule.startDate, 
-                        projectSchedule.endDate,
-                        projectSchedule.workingDays,
-                        projectSchedule.hoursPerDay
-                    );
-                    setLaborSchedule(curve);
-                }
-            };
-
-            const formatCurrency = (amount) => {
-                return new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                }).format(amount);
-            };
-
-            const clearFile = () => {
-                setUploadedFile(null);
-                setRoomAnalysis(null);
-                setProject(prev => ({ ...prev, squareFootage: '' }));
-                if (fileInputRef.current) {
-                    fileInputRef.current.value = '';
-                }
-            };
-
-            const exportToExcel = () => {
-                if (!estimate) {
-                    alert('Please generate an estimate first');
-                    return;
-                }
-                
-                alert('Export feature would generate a detailed CSV file with all project data, cost breakdowns, and historical comparisons.');
-            };
-
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-                    <div className="max-w-7xl mx-auto">
-                        {/* Header */}
-                        <div className="text-center mb-8">
-                            <div className="flex items-center justify-center mb-4">
-                                <Thermometer />
-                                <h1 className="text-4xl font-bold text-gray-800">HVAC Budget Estimator</h1>
-                            </div>
-                            <p className="text-lg text-gray-600">Generate accurate HVAC cost estimates with AI drawing analysis</p>
-                            <p className="text-sm text-gray-500 mt-2">Based on 168 historical projects • Automated room detection</p>
-                        </div>
-
-                        <div className="grid lg:grid-cols-2 gap-8">
-                            {/* Input Panel */}
-                            <div className="bg-white rounded-xl shadow-lg p-6">
-                                <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                                    <FileText />
-                                    Project Information
-                                </h2>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
-                                        <input
-                                            type="text"
-                                            value={project.name}
-                                            onChange={(e) => setProject(prev => ({ ...prev, name: e.target.value }))}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Enter project name"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-                                        <input
-                                            type="text"
-                                            value={project.location}
-                                            onChange={(e) => setProject(prev => ({ ...prev, location: e.target.value }))}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Enter project location"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Square Footage *
-                                            {roomAnalysis && (
-                                                <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Auto-calculated</span>
-                                            )}
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={project.squareFootage}
-                                            onChange={(e) => setProject(prev => ({ ...prev, squareFootage: e.target.value }))}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Enter square footage"
-                                            disabled={!!roomAnalysis}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Building Type *</label>
-                                        <select
-                                            value={project.buildingType}
-                                            onChange={(e) => setProject(prev => ({ ...prev, buildingType: e.target.value }))}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        >
-                                            <option value="">Select building type</option>
-                                            {buildingTypes.map(type => (
-                                                <option key={type.name} value={type.name}>
-                                                    {type.name} (${type.avgCost.toFixed(2)}/sq ft avg, {type.projects} projects)
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Project Type *</label>
-                                        <select
-                                            value={project.projectType}
-                                            onChange={(e) => setProject(prev => ({ ...prev, projectType: e.target.value }))}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        >
-                                            <option value="">Select project type</option>
-                                            {projectTypes.map(type => (
-                                                <option key={type.name} value={type.name}>
-                                                    {type.name} (${type.avgCost.toFixed(2)}/sq ft avg, {type.projects} projects)
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    {/* File Upload */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Upload Architectural Drawing (Optional)</label>
-                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-                                            <h4 className="font-medium text-blue-800 mb-2">🎯 What the Drawing Upload Does:</h4>
-                                            <ul className="text-sm text-blue-700 space-y-1">
-                                                <li>• <strong>Automatic Room Detection:</strong> AI analyzes your drawing to identify different room types</li>
-                                                <li>• <strong>Smart Area Calculation:</strong> Calculates total square footage automatically</li>
-                                                <li>• <strong>Room-Specific HVAC Costs:</strong> Applies different cost multipliers based on room function</li>
-                                                <li>• <strong>More Accurate Estimates:</strong> Server rooms, labs, and kitchens have higher HVAC requirements</li>
-                                            </ul>
-                                        </div>
-                                        
-                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                                            {!uploadedFile ? (
-                                                <div onClick={() => fileInputRef.current?.click()} className="cursor-pointer">
-                                                    <Upload />
-                                                    <p className="text-gray-600 mb-2">Click to upload drawing</p>
-                                                    <p className="text-sm text-gray-500">PDF, JPG, PNG, DWG files supported</p>
-                                                </div>
-                                            ) : (
-                                                <div className="space-y-3">
-                                                    <CheckCircle />
-                                                    <div>
-                                                        <p className="font-medium text-gray-800">{uploadedFile.name}</p>
-                                                        <p className="text-sm text-gray-500">{(uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                                                    </div>
-                                                    {isAnalyzing && (
-                                                        <div className="flex items-center justify-center">
-                                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                                                            <span className="text-sm text-blue-600">Analyzing rooms and calculating areas...</span>
-                                                        </div>
-                                                    )}
-                                                    {roomAnalysis && !isAnalyzing && (
-                                                        <div className="bg-green-50 p-3 rounded-lg">
-                                                            <div className="text-sm text-green-800 font-medium">
-                                                                ✅ Advanced Analysis Complete!
-                                                            </div>
-                                                            <div className="text-sm text-green-700 mt-1">
-                                                                <strong>Rooms:</strong> {roomAnalysis.rooms.length} detected • {roomAnalysis.totalArea.toLocaleString()} sq ft total
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    <button
-                                                        onClick={clearFile}
-                                                        className="text-red-600 hover:text-red-800 text-sm flex items-center mx-auto"
-                                                    >
-                                                        <Trash2 />
-                                                        Remove file and use manual entry
-                                                    </button>
-                                                </div>
-                                            )}
-                                            <input
-                                                ref={fileInputRef}
-                                                type="file"
-                                                onChange={handleFileUpload}
-                                                accept=".pdf,.jpg,.jpeg,.png,.dwg"
-                                                className="hidden"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Project Schedule Section */}
-                                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                        <h4 className="font-medium text-yellow-800 mb-3">📅 Project Schedule (Optional)</h4>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                                                <input
-                                                    type="date"
-                                                    value={projectSchedule.startDate}
-                                                    onChange={(e) => setProjectSchedule(prev => ({ ...prev, startDate: e.target.value }))}
-                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                                                <input
-                                                    type="date"
-                                                    value={projectSchedule.endDate}
-                                                    onChange={(e) => setProjectSchedule(prev => ({ ...prev, endDate: e.target.value }))}
-                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4 mt-3">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Working Days/Week</label>
-                                                <select
-                                                    value={projectSchedule.workingDays}
-                                                    onChange={(e) => setProjectSchedule(prev => ({ ...prev, workingDays: parseInt(e.target.value) }))}
-                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                                >
-                                                    <option value={5}>5 days (Mon-Fri)</option>
-                                                    <option value={6}>6 days (Mon-Sat)</option>
-                                                    <option value={7}>7 days (Full week)</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Hours/Day</label>
-                                                <select
-                                                    value={projectSchedule.hoursPerDay}
-                                                    onChange={(e) => setProjectSchedule(prev => ({ ...prev, hoursPerDay: parseInt(e.target.value) }))}
-                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                                >
-                                                    <option value={8}>8 hours (Standard)</option>
-                                                    <option value={10}>10 hours (Extended)</option>
-                                                    <option value={12}>12 hours (Overtime)</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div className="text-xs text-yellow-700 mt-2">
-                                            💡 Adding dates enables detailed labor curve analysis showing daily worker allocation and costs
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
-                                        <textarea
-                                            value={project.notes}
-                                            onChange={(e) => setProject(prev => ({ ...prev, notes: e.target.value }))}
-                                            rows={3}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Special requirements, existing conditions, etc."
-                                        />
-                                    </div>
-
-                                    <button
-                                        onClick={generateEstimate}
-                                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-                                    >
-                                        <Calculator />
-                                        Generate Estimate
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Results Panel */}
-                            <div className="bg-white rounded-xl shadow-lg p-6">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-2xl font-semibold text-gray-800 flex items-center">
-                                        <DollarSign />
-                                        Cost Estimate
-                                    </h2>
-                                    {estimate && (
-                                        <button
-                                            onClick={exportToExcel}
-                                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center text-sm"
-                                        >
-                                            <Download />
-                                            Export to Excel
-                                        </button>
-                                    )}
-                                </div>
-
-                                {!estimate ? (
-                                    <div className="text-center py-16">
-                                        <Building />
-                                        <p className="text-gray-500">Complete the form and click "Generate Estimate"</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-6">
-                                        {/* Project Summary */}
-                                        <div className="bg-blue-50 p-4 rounded-lg">
-                                            <h3 className="font-semibold text-gray-800 mb-2">{estimate.project.name || "Unnamed Project"}</h3>
-                                            <div className="grid grid-cols-2 gap-2 text-sm">
-                                                <div><span className="text-gray-600">Size:</span> {parseInt(estimate.project.squareFootage).toLocaleString()} sq ft</div>
-                                                <div><span className="text-gray-600">Type:</span> {estimate.project.projectType}</div>
-                                                <div><span className="text-gray-600">Category:</span> {estimate.project.buildingType}</div>
-                                                <div><span className="text-gray-600">Confidence:</span> 
-                                                    <span className={`ml-1 px-2 py-1 rounded text-xs ${
-                                                        estimate.confidence === 'High' ? 'bg-green-100 text-green-800' :
-                                                        estimate.confidence === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                                                        'bg-red-100 text-red-800'
-                                                    }`}>
-                                                        {estimate.confidence}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Main Estimate */}
-                                        <div className="bg-green-50 p-6 rounded-lg text-center">
-                                            <h3 className="text-lg font-semibold text-gray-800 mb-2">Total Estimated Cost</h3>
-                                            <div className="text-3xl font-bold text-green-600 mb-2">{formatCurrency(estimate.totalCost)}</div>
-                                            <div className="text-lg text-gray-600">${estimate.costPerSqft.toFixed(2)} per sq ft</div>
-                                        </div>
-
-                                        {/* Historical Comparison */}
-                                        <div className="mb-6">
-                                            <h4 className="font-semibold text-gray-800 mb-3">📊 Project vs Historical Data</h4>
-                                            
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {/* Project Type Comparison */}
-                                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                                    <h5 className="font-medium text-blue-800 mb-2">Project Type Analysis</h5>
-                                                    {(() => {
-                                                        const matchingType = projectTypes.find(type => type.name === estimate.project?.projectType);
-                                                        if (matchingType) {
-                                                            const variance = ((estimate.costPerSqft - matchingType.avgCost) / matchingType.avgCost * 100);
-                                                            const isHigher = variance > 0;
-                                                            return (
-                                                                <div className="space-y-2 text-sm">
-                                                                    <div>Type: <strong>{matchingType.name}</strong></div>
-                                                                    <div>Historical Avg: <strong>${matchingType.avgCost.toFixed(2)}/sq ft</strong></div>
-                                                                    <div>Your Estimate: <strong>${estimate.costPerSqft.toFixed(2)}/sq ft</strong></div>
-                                                                    <div className={`font-bold ${isHigher ? 'text-red-600' : 'text-green-600'}`}>
-                                                                        {variance.toFixed(1)}% {isHigher ? 'HIGHER' : 'LOWER'}
-                                                                    </div>
-                                                                    <div className="text-xs text-gray-600">Based on {matchingType.projects} projects</div>
-                                                                </div>
-                                                            );
-                                                        } else {
-                                                            return <div className="text-sm text-red-600">No historical match found</div>;
-                                                        }
-                                                    })()}
-                                                </div>
-
-                                                {/* Building Type Comparison */}
-                                                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                                                    <h5 className="font-medium text-green-800 mb-2">Building Type Analysis</h5>
-                                                    {(() => {
-                                                        const matchingType = buildingTypes.find(type => type.name === estimate.project?.buildingType);
-                                                        if (matchingType) {
-                                                            const variance = ((estimate.costPerSqft - matchingType.avgCost) / matchingType.avgCost * 100);
-                                                            const isHigher = variance > 0;
-                                                            return (
-                                                                <div className="space-y-2 text-sm">
-                                                                    <div>Category: <strong>{matchingType.name}</strong></div>
-                                                                    <div>Category Avg: <strong>${matchingType.avgCost.toFixed(2)}/sq ft</strong></div>
-                                                                    <div>Your Estimate: <strong>${estimate.costPerSqft.toFixed(2)}/sq ft</strong></div>
-                                                                    <div className={`font-bold ${isHigher ? 'text-red-600' : 'text-green-600'}`}>
-                                                                        {variance.toFixed(1)}% {isHigher ? 'HIGHER' : 'LOWER'}
-                                                                    </div>
-                                                                    <div className="text-xs text-gray-600">Based on {matchingType.projects} buildings</div>
-                                                                </div>
-                                                            );
-                                                        } else {
-                                                            return <div className="text-sm text-red-600">No historical match found</div>;
-                                                        }
-                                                    })()}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Cost Breakdown */}
-                                        <div>
-                                            <h4 className="font-semibold text-gray-800 mb-4">Cost Breakdown</h4>
-                                            
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                                                    <span className="font-medium text-gray-800">HVAC Equipment (35%)</span>
-                                                    <span className="font-semibold text-blue-600">{formatCurrency(estimate.breakdown.equipment.total)}</span>
-                                                </div>
-                                                
-                                                <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                                                    <span className="font-medium text-gray-800">Sheet Metal & Ductwork (25%)</span>
-                                                    <span className="font-semibold text-green-600">{formatCurrency(estimate.breakdown.sheetMetal.total)}</span>
-                                                </div>
-                                                
-                                                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                                                    <span className="font-medium text-gray-800">Piping & Hydronic (15%)</span>
-                                                    <span className="font-semibold text-purple-600">{formatCurrency(estimate.breakdown.piping.total)}</span>
-                                                </div>
-                                                
-                                                <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
-                                                    <span className="font-medium text-gray-800">Controls & Electrical (10%)</span>
-                                                    <span className="font-semibold text-yellow-600">{formatCurrency(estimate.breakdown.controls.total)}</span>
-                                                </div>
-                                                
-                                                <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-                                                    <span className="font-medium text-gray-800">Installation Labor (20%)</span>
-                                                    <span className="font-semibold text-orange-600">{formatCurrency(estimate.breakdown.labor.total)}</span>
-                                                </div>
-                                                
-                                                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                                    <span className="font-medium text-gray-800">Overhead & Markup (15%)</span>
-                                                    <span className="font-semibold text-gray-600">{formatCurrency(estimate.breakdown.overhead.total)}</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="border-t-2 border-gray-200 pt-4 mt-4">
-                                                <div className="flex justify-between items-center p-4 bg-indigo-50 rounded-lg">
-                                                    <span className="text-lg font-semibold text-gray-800">TOTAL PROJECT COST</span>
-                                                    <span className="text-2xl font-bold text-indigo-600">{formatCurrency(estimate.totalCost)}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Room Analysis Results */}
-                                        {estimate.roomCosts && (
-                                            <div>
-                                                <h4 className="font-semibold text-gray-800 mb-3">Room-Specific Analysis</h4>
-                                                <div className="space-y-3">
-                                                    {Object.entries(estimate.roomCosts).map(([roomType, data]) => (
-                                                        <div key={roomType} className="bg-gray-50 p-3 rounded-lg">
-                                                            <div className="flex justify-between items-center mb-1">
-                                                                <span className="font-medium">{roomType}</span>
-                                                                <span className="font-semibold text-blue-600">{formatCurrency(data.totalCost)}</span>
-                                                            </div>
-                                                            <div className="text-sm text-gray-600">
-                                                                {data.area} sq ft × ${data.costPerSqft.toFixed(2)}/sq ft
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Detailed Labor Analysis */}
-                                        {estimate.detailedLabor && (
-                                            <div>
-                                                <div className="flex justify-between items-center mb-3">
-                                                    <h4 className="font-semibold text-gray-800">⚡ Detailed Labor Analysis</h4>
-                                                    {laborSchedule && (
-                                                        <button
-                                                            onClick={() => setShowLaborCurve(!showLaborCurve)}
-                                                            className="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700"
-                                                        >
-                                                            {showLaborCurve ? 'Hide' : 'Show'} Labor Curve
-                                                        </button>
-                                                    )}
-                                                </div>
-
-                                                {/* Labor Trades Summary */}
-                                                <div className="bg-purple-50 p-4 rounded-lg mb-4">
-                                                    <h5 className="font-medium text-purple-800 mb-3">Labor Breakdown by Trade</h5>
-                                                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                                                        {Object.entries(estimate.detailedLabor)
-                                                            .sort((a, b) => a[1].sequence - b[1].sequence)
-                                                            .map(([trade, data]) => (
-                                                            <div key={trade} className="flex justify-between items-center p-2 bg-white rounded border">
-                                                                <div className="flex-1">
-                                                                    <div className="font-medium text-sm">{trade}</div>
-                                                                    <div className="text-xs text-gray-600">{data.description}</div>
-                                                                </div>
-                                                                <div className="text-right text-xs">
-                                                                    <div className="font-semibold">{formatCurrency(data.laborCost)}</div>
-                                                                    <div className="text-gray-500">{data.totalHours}h • {data.crew} workers</div>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                    <div className="border-t pt-2 mt-2">
-                                                        <div className="flex justify-between font-semibold">
-                                                            <span>Total Labor Cost:</span>
-                                                            <span className="text-purple-600">
-                                                                {formatCurrency(Object.values(estimate.detailedLabor).reduce((sum, trade) => sum + trade.laborCost, 0))}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Labor Curve Visualization */}
-                                                {showLaborCurve && laborSchedule && (
-                                                    <div className="bg-indigo-50 p-4 rounded-lg">
-                                                        <h5 className="font-medium text-indigo-800 mb-3">📈 Labor Curve Analysis</h5>
-                                                        
-                                                        {/* Summary Stats */}
-                                                        <div className="grid grid-cols-3 gap-4 mb-4">
-                                                            <div className="bg-white p-3 rounded text-center">
-                                                                <div className="text-lg font-bold text-indigo-600">{laborSchedule.summary.totalWorkDays}</div>
-                                                                <div className="text-xs text-gray-600">Work Days</div>
-                                                            </div>
-                                                            <div className="bg-white p-3 rounded text-center">
-                                                                <div className="text-lg font-bold text-indigo-600">{laborSchedule.summary.peakWorkers}</div>
-                                                                <div className="text-xs text-gray-600">Peak Workers</div>
-                                                            </div>
-                                                            <div className="bg-white p-3 rounded text-center">
-                                                                <div className="text-lg font-bold text-indigo-600">{laborSchedule.summary.averageWorkers}</div>
-                                                                <div className="text-xs text-gray-600">Avg Workers</div>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Labor Curve Chart (Text-based) */}
-                                                        <div className="bg-white p-3 rounded">
-                                                            <h6 className="font-medium mb-2">Daily Worker Allocation</h6>
-                                                            <div className="space-y-1 max-h-32 overflow-y-auto text-xs">
-                                                                {laborSchedule.laborCurve.slice(0, 20).map((day, index) => (
-                                                                    <div key={index} className="flex items-center">
-                                                                        <div className="w-20 text-gray-600">{day.date}</div>
-                                                                        <div className="flex-1 bg-gray-200 rounded h-4 mx-2 relative">
-                                                                            <div 
-                                                                                className="bg-indigo-500 h-full rounded"
-                                                                                style={{width: `${(day.totalWorkers / laborSchedule.summary.peakWorkers) * 100}%`}}
-                                                                            ></div>
-                                                                            <div className="absolute inset-0 flex items-center justify-center text-xs text-white font-bold">
-                                                                                {day.totalWorkers}
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="w-20 text-right text-gray-600">{formatCurrency(day.totalCost)}</div>
-                                                                    </div>
-                                                                ))}
-                                                                {laborSchedule.laborCurve.length > 20 && (
-                                                                    <div className="text-center text-gray-500 text-xs py-2">
-                                                                        ... and {laborSchedule.laborCurve.length - 20} more days
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Trade Schedule */}
-                                                        <div className="bg-white p-3 rounded mt-3">
-                                                            <h6 className="font-medium mb-2">Trade Schedule</h6>
-                                                            <div className="space-y-2 max-h-32 overflow-y-auto">
-                                                                {laborSchedule.tradeSchedule.map((trade, index) => (
-                                                                    <div key={index} className="flex justify-between items-center text-xs p-2 bg-gray-50 rounded">
-                                                                        <div>
-                                                                            <div className="font-medium">{trade.trade}</div>
-                                                                            <div className="text-gray-600">Days {trade.startDay + 1}-{trade.endDay + 1}</div>
-                                                                        </div>
-                                                                        <div className="text-right">
-                                                                            <div className="font-medium">{trade.crew} workers</div>
-                                                                            <div className="text-gray-600">{trade.totalHours}h total</div>
-                                                                        </div>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Historical Reference */}
-                        <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
-                            <h3 className="text-xl font-semibold text-gray-800 mb-4">Historical Data Reference</h3>
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <h4 className="font-medium text-gray-700 mb-3">Project Types (Top 10)</h4>
-                                    <div className="space-y-2 text-sm">
-                                        {projectTypes.slice(0, 10).map(type => (
-                                            <div key={type.name} className="flex justify-between">
-                                                <span className="text-gray-600">{type.name}</span>
-                                                <span className="font-medium">${type.avgCost.toFixed(2)}/sq ft</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 className="font-medium text-gray-700 mb-3">Building Types</h4>
-                                    <div className="space-y-2 text-sm">
-                                        {buildingTypes.map(type => (
-                                            <div key={type.name} className="flex justify-between">
-                                                <span className="text-gray-600">{type.name}</span>
-                                                <span className="font-medium">${type.avgCost.toFixed(2)}/sq ft</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
+            const resultsContent = document.getElementById('resultsContent');
+            
+            resultsContent.innerHTML = `
+                <!-- Project Summary -->
+                <div class="project-summary">
+                    <h3>${estimate.project.name}</h3>
+                    <div class="project-grid">
+                        <div><span style="color: #6b7280;">Size:</span> ${parseInt(estimate.project.squareFootage).toLocaleString()} sq ft</div>
+                        <div><span style="color: #6b7280;">Type:</span> ${estimate.project.projectType}</div>
+                        <div><span style="color: #6b7280;">Category:</span> ${estimate.project.buildingType}</div>
+                        <div>
+                            <span style="color: #6b7280;">Confidence:</span>
+                            <span class="confidence-badge confidence-${estimate.confidence.toLowerCase()}">${estimate.confidence}</span>
                         </div>
                     </div>
                 </div>
-            );
-        };
 
-        ReactDOM.render(<HVACEstimator />, document.getElementById('app'));
+                <!-- Main Estimate -->
+                <div class="main-estimate">
+                    <h3>Total Estimated Cost</h3>
+                    <div class="amount">${formatCurrency(estimate.totalCost)}</div>
+                    <div class="per-sqft">$${estimate.costPerSqft.toFixed(2)} per sq ft</div>
+                </div>
+
+                <!-- Historical Comparison -->
+                <div class="historical-section">
+                    <h4 style="font-weight: 600; color: #1f2937; margin-bottom: 0.75rem;">📊 Project vs Historical Data</h4>
+                    <div class="historical-grid">
+                        ${generateHistoricalComparison(estimate)}
+                    </div>
+                </div>
+
+                <!-- Cost Breakdown -->
+                <div>
+                    <h4 style="font-weight: 600; color: #1f2937; margin-bottom: 1rem;">Cost Breakdown</h4>
+                    
+                    <div class="breakdown-item" style="background-color: #dbeafe;">
+                        <span style="font-weight: 500; color: #1f2937;">HVAC Equipment (35%)</span>
+                        <span style="font-weight: 600; color: #2563eb;">${formatCurrency(estimate.breakdown.equipment.total)}</span>
+                    </div>
+                    
+                    <div class="breakdown-item" style="background-color: #dcfce7;">
+                        <span style="font-weight: 500; color: #1f2937;">Sheet Metal & Ductwork (25%)</span>
+                        <span style="font-weight: 600; color: #16a34a;">${formatCurrency(estimate.breakdown.sheetMetal.total)}</span>
+                    </div>
+                    
+                    <div class="breakdown-item" style="background-color: #f3e8ff;">
+                        <span style="font-weight: 500; color: #1f2937;">Piping & Hydronic (15%)</span>
+                        <span style="font-weight: 600; color: #7c3aed;">${formatCurrency(estimate.breakdown.piping.total)}</span>
+                    </div>
+                    
+                    <div class="breakdown-item" style="background-color: #fef3c7;">
+                        <span style="font-weight: 500; color: #1f2937;">Controls & Electrical (10%)</span>
+                        <span style="font-weight: 600; color: #d97706;">${formatCurrency(estimate.breakdown.controls.total)}</span>
+                    </div>
+                    
+                    <div class="breakdown-item" style="background-color: #fed7aa;">
+                        <span style="font-weight: 500; color: #1f2937;">Installation Labor (20%)</span>
+                        <span style="font-weight: 600; color: #ea580c;">${formatCurrency(estimate.breakdown.labor.total)}</span>
+                    </div>
+                    
+                    <div class="breakdown-item" style="background-color: #f3f4f6;">
+                        <span style="font-weight: 500; color: #1f2937;">Overhead & Markup (15%)</span>
+                        <span style="font-weight: 600; color: #6b7280;">${formatCurrency(estimate.breakdown.overhead.total)}</span>
+                    </div>
+
+                    <div class="breakdown-total">
+                        <div class="breakdown-item">
+                            <span style="font-size: 1.125rem; font-weight: 600; color: #1f2937;">TOTAL PROJECT COST</span>
+                            <span class="amount">${formatCurrency(estimate.totalCost)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                ${estimate.roomCosts ? generateRoomAnalysis(estimate.roomCosts) : ''}
+            `;
+        }
+
+        function generateHistoricalComparison(estimate) {
+            const projectTypeMatch = projectTypes.find(type => type.name === estimate.project.projectType);
+            const buildingTypeMatch = buildingTypes.find(type => type.name === estimate.project.buildingType);
+
+            let projectTypeHtml = '<div class="text-sm" style="color: #dc2626;">No historical match found</div>';
+            let buildingTypeHtml = '<div class="text-sm" style="color: #dc2626;">No historical match found</div>';
+
+            if (projectTypeMatch) {
+                const variance = ((estimate.costPerSqft - projectTypeMatch.avgCost) / projectTypeMatch.avgCost * 100);
+                const isHigher = variance > 0;
+                projectTypeHtml = `
+                    <div style="font-size: 0.875rem; line-height: 1.5;">
+                        <div>Type: <strong>${projectTypeMatch.name}</strong></div>
+                        <div>Historical Avg: <strong>$${projectTypeMatch.avgCost.toFixed(2)}/sq ft</strong></div>
+                        <div>Your Estimate: <strong>$${estimate.costPerSqft.toFixed(2)}/sq ft</strong></div>
+                        <div class="${isHigher ? 'variance-higher' : 'variance-lower'}">
+                            ${variance.toFixed(1)}% ${isHigher ? 'HIGHER' : 'LOWER'}
+                        </div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">Based on ${projectTypeMatch.projects} projects</div>
+                    </div>
+                `;
+            }
+
+            if (buildingTypeMatch) {
+                const variance = ((estimate.costPerSqft - buildingTypeMatch.avgCost) / buildingTypeMatch.avgCost * 100);
+                const isHigher = variance > 0;
+                buildingTypeHtml = `
+                    <div style="font-size: 0.875rem; line-height: 1.5;">
+                        <div>Category: <strong>${buildingTypeMatch.name}</strong></div>
+                        <div>Category Avg: <strong>$${buildingTypeMatch.avgCost.toFixed(2)}/sq ft</strong></div>
+                        <div>Your Estimate: <strong>$${estimate.costPerSqft.toFixed(2)}/sq ft</strong></div>
+                        <div class="${isHigher ? 'variance-higher' : 'variance-lower'}">
+                            ${variance.toFixed(1)}% ${isHigher ? 'HIGHER' : 'LOWER'}
+                        </div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">Based on ${buildingTypeMatch.projects} buildings</div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="historical-card historical-blue">
+                    <h5 style="color: #1e40af;">Project Type Analysis</h5>
+                    ${projectTypeHtml}
+                </div>
+                <div class="historical-card historical-green">
+                    <h5 style="color: #166534;">Building Type Analysis</h5>
+                    ${buildingTypeHtml}
+                </div>
+            `;
+        }
+
+        function generateRoomAnalysis(roomCosts) {
+            const roomItems = Object.entries(roomCosts).map(([roomType, data]) => `
+                <div style="background-color: #f9fafb; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                        <span style="font-weight: 500;">${roomType}</span>
+                        <span style="font-weight: 600; color: #2563eb;">${formatCurrency(data.totalCost)}</span>
+                    </div>
+                    <div style="font-size: 0.875rem; color: #6b7280;">
+                        ${data.area} sq ft × $${data.costPerSqft.toFixed(2)}/sq ft
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div style="margin-top: 1.5rem;">
+                    <h4 style="font-weight: 600; color: #1f2937; margin-bottom: 0.75rem;">Room-Specific Analysis</h4>
+                    ${roomItems}
+                </div>
+            `;
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function exportToExcel() {
+            if (!currentEstimate) {
+                alert('Please generate an estimate first');
+                return;
+            }
+            
+            alert('Export feature would generate a detailed CSV file with all project data, cost breakdowns, and historical comparisons.');
+        }
     </script>
 </body>
 </html>
